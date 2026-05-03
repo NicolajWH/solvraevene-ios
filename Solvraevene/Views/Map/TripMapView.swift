@@ -15,19 +15,17 @@ struct TripMapView: View {
 
     var body: some View {
         Map(coordinateRegion: $region, annotationItems: tripsWithCoordinates) { trip in
-            if let coordinate = trip.coordinate {
-                MapAnnotation(coordinate: coordinate) {
-                    VStack {
-                        Text(trip.location)
-                            .font(.caption)
-                            .padding(5)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(6)
+            MapAnnotation(coordinate: trip.coordinate!) {
+                VStack {
+                    Text(trip.location)
+                        .font(.caption)
+                        .padding(5)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(6)
 
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundColor(.red)
-                            .font(.title)
-                    }
+                    Image(systemName: "mappin.circle.fill")
+                        .foregroundStyle(.red)
+                        .font(.title)
                 }
             }
         }
