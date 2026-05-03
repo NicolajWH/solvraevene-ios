@@ -11,7 +11,7 @@ struct ContentView: View {
             }
 
             NavigationStack {
-                Text("Ture")
+                TripListView()
             }
             .tabItem {
                 Label("Ture", systemImage: "calendar")
