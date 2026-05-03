@@ -1,0 +1,16 @@
+# project.yml
+name: Solvraevene
+options:
+  bundleIdPrefix: dk.haugaard
+targets:
+  Solvraevene:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - Solvraevene
+    resources:
+      - Solvraevene/Resources
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: dk.haugaard.solvraevene
+      INFOPLIST_FILE: Solvraevene/Info.plist
