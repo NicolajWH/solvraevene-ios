@@ -26,8 +26,15 @@ struct HomeView: View {
             }
 
             Section("Statistik") {
-                Text("Kommer snart")
-            }
+                ForEach(StatsService.organizerCounts(from: trips), id: \.name) { item in
+                HStack {
+                    Text(item.name)
+                    Spacer()
+                    Text("\(item.count)")
+                    .foregroundStyle(.secondary)
+        }
+    }
+}
         }
         .navigationTitle("Sølvrævene")
     }
