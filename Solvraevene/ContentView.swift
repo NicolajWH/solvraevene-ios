@@ -18,7 +18,7 @@ struct ContentView: View {
             }
 
             NavigationStack {
-                Text("Kort")
+                TripMapView()
             }
             .tabItem {
                 Label("Kort", systemImage: "map.fill")
