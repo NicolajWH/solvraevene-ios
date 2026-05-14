@@ -5,7 +5,7 @@ options:
 
 settings:
   DEVELOPMENT_TEAM: 77GX5T6B82
-  CODE_SIGN_STYLE: Automatic
+  CODE_SIGN_STYLE: Manual
 
 targets:
   Solvraevene:
@@ -20,4 +20,6 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: dk.haugaard.solvraevene
       INFOPLIST_FILE: Solvraevene/Info.plist
       DEVELOPMENT_TEAM: 77GX5T6B82
-      CODE_SIGN_STYLE: Automatic
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: Apple Distribution
+      PROVISIONING_PROFILE_SPECIFIER: match AppStore dk.haugaard.solvraevene
