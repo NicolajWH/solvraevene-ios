@@ -39,9 +39,11 @@ build_app(
   }
 )
 
-    upload_to_testflight(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true
-    )
+upload_to_testflight(
+  api_key: api_key,
+  groups: ["SR"],
+  notify_external_testers: false,
+  skip_waiting_for_build_processing: false
+)
   end
 end
