@@ -25,14 +25,14 @@ struct ContentView: View {
             }
 
             NavigationStack {
-                Text("Lande")
+                CountriesView()
             }
             .tabItem {
                 Label("Lande", systemImage: "flag.fill")
             }
 
             NavigationStack {
-                Text("Personer")
+                PersonerView()
             }
             .tabItem {
                 Label("Personer", systemImage: "person.3.fill")
