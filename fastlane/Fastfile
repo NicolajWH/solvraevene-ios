@@ -26,16 +26,17 @@ platform :ios do
       build_number: ENV["GITHUB_RUN_NUMBER"]
     )
 
-    build_app(
-      project: "Solvraevene.xcodeproj",
-      scheme: "Solvraevene",
-      export_method: "app-store",
-      export_options: {
-        provisioningProfiles: {
-          "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene"
-        }
-      }
-    )
+build_app(
+  project: "Solvraevene.xcodeproj",
+  scheme: "Solvraevene",
+  export_method: "app-store",
+  disable_xcpretty: true,
+  export_options: {
+    provisioningProfiles: {
+      "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene"
+    }
+  }
+)
 
     upload_to_testflight(
       api_key: api_key,
