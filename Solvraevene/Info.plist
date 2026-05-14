@@ -7,7 +7,10 @@
     <string>Sølvrævene</string>
 
     <key>CFBundleName</key>
-    <string>Solvraevene</string>
+    <string>$(PRODUCT_NAME)</string>
+
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
 
     <key>CFBundleIdentifier</key>
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
@@ -20,6 +23,9 @@
 
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
 
     <key>UILaunchScreen</key>
     <dict/>
