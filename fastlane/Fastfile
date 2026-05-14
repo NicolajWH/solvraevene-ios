@@ -28,7 +28,11 @@ platform :ios do
       project: "Solvraevene.xcodeproj",
       scheme: "Solvraevene",
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      export_options: {
+        provisioningProfiles: {
+          "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene"
+        }
+      }
     )
 
     upload_to_testflight(
