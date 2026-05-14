@@ -34,10 +34,3 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
         run: bundle exec fastlane ios beta
-
-      - name: Upload fastlane logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastlane-gym-logs
-          path: ~/Library/Logs/gym
