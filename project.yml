@@ -1,7 +1,12 @@
-# project.yml
 name: Solvraevene
+
 options:
   bundleIdPrefix: dk.haugaard
+
+settings:
+  DEVELOPMENT_TEAM: 77GX5T6B82
+  CODE_SIGN_STYLE: Automatic
+
 targets:
   Solvraevene:
     type: application
@@ -14,3 +19,5 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: dk.haugaard.solvraevene
       INFOPLIST_FILE: Solvraevene/Info.plist
+      DEVELOPMENT_TEAM: 77GX5T6B82
+      CODE_SIGN_STYLE: Automatic
