@@ -1,43 +1,43 @@
 [
-  { "date": "2025-05-17", "location": "TBD", "organizers": ["DM","NWH"] },
-  { "date": "2024-10-25", "location": "TBD", "organizers": ["MC","MSA"] },
-  { "date": "2024-05-03", "location": "TBD", "organizers": ["PHA","MR"] },
+  { "date": "2025-05-17", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","NWH"] },
+  { "date": "2024-10-25", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MC","MSA"] },
+  { "date": "2024-05-03", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["PHA","MR"] },
 
-  { "date": "2022-10-28", "location": "TBD", "organizers": ["MR","MC"] },
-  { "date": "2022-04-30", "location": "TBD", "organizers": ["DM","MSA"] },
+  { "date": "2022-10-28", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MR","MC"] },
+  { "date": "2022-04-30", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","MSA"] },
 
-  { "date": "2021-10-29", "location": "TBD", "organizers": ["PHA","NWH"] },
+  { "date": "2021-10-29", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["PHA","NWH"] },
 
-  { "date": "2020-10-23", "location": "TBD", "organizers": ["MC","MR"] },
-  { "date": "2020-06-12", "location": "TBD", "organizers": ["MSA","NWH"] },
+  { "date": "2020-10-23", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MC","MR"] },
+  { "date": "2020-06-12", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MSA","NWH"] },
 
-  { "date": "2019-09-20", "location": "Wolfsburg", "organizers": ["DM","MR"] },
-  { "date": "2019-04-26", "location": "Henne Kirkeby", "organizers": ["PHA","MC"] },
+  { "date": "2019-09-20", "location": "Wolfsburg", "country": "DE", "lat": 52.4227, "lng": 10.7865, "organizers": ["DM","MR"] },
+  { "date": "2019-04-26", "location": "Henne Kirkeby", "country": "DK", "lat": 55.7300, "lng": 8.2200, "organizers": ["PHA","MC"] },
 
-  { "date": "2018-10-26", "location": "TBD", "organizers": ["DM","PHA"] },
-  { "date": "2018-04-27", "location": "TBD", "organizers": ["MSA","MR"] },
+  { "date": "2018-10-26", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","PHA"] },
+  { "date": "2018-04-27", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MSA","MR"] },
 
-  { "date": "2017-10-26", "location": "TBD", "organizers": ["MC","NWH"] },
-  { "date": "2017-04-01", "location": "TBD", "organizers": ["PHA","MR"] },
+  { "date": "2017-10-26", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MC","NWH"] },
+  { "date": "2017-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["PHA","MR"] },
 
-  { "date": "2016-10-01", "location": "TBD", "organizers": ["DM","MSA"] },
-  { "date": "2016-04-01", "location": "TBD", "organizers": ["NWH","MR"] },
+  { "date": "2016-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","MSA"] },
+  { "date": "2016-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["NWH","MR"] },
 
-  { "date": "2014-10-01", "location": "TBD", "organizers": ["DM","MC"] },
-  { "date": "2014-04-01", "location": "TBD", "organizers": ["PHA","MSA"] },
+  { "date": "2014-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","MC"] },
+  { "date": "2014-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["PHA","MSA"] },
 
-  { "date": "2013-10-01", "location": "TBD", "organizers": ["DM","PHA"] },
-  { "date": "2013-04-01", "location": "TBD", "organizers": ["NWH","MC"] },
+  { "date": "2013-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","PHA"] },
+  { "date": "2013-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["NWH","MC"] },
 
-  { "date": "2012-10-01", "location": "TBD", "organizers": ["MC","MR"] },
-  { "date": "2012-04-01", "location": "TBD", "organizers": ["NWH","MSA"] },
+  { "date": "2012-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MC","MR"] },
+  { "date": "2012-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["NWH","MSA"] },
 
-  { "date": "2011-10-01", "location": "TBD", "organizers": ["DM","MR"] },
-  { "date": "2011-04-01", "location": "TBD", "organizers": ["NWH","PHA"] },
+  { "date": "2011-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","MR"] },
+  { "date": "2011-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["NWH","PHA"] },
 
-  { "date": "2010-10-01", "location": "TBD", "organizers": ["DM","NWH"] },
-  { "date": "2010-04-01", "location": "TBD", "organizers": ["MSA","MC"] },
+  { "date": "2010-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["DM","NWH"] },
+  { "date": "2010-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MSA","MC"] },
 
-  { "date": "2009-10-01", "location": "TBD", "organizers": ["MC","PHA"] },
-  { "date": "2009-04-01", "location": "TBD", "organizers": ["MSA","MR"] }
+  { "date": "2009-10-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MC","PHA"] },
+  { "date": "2009-04-01", "location": "Ukendt lokation", "country": null, "lat": null, "lng": null, "organizers": ["MSA","MR"] }
 ]
