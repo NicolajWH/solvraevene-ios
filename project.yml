@@ -19,18 +19,6 @@ targets:
     sources:
       - Solvraevene
 
-    info:
-      path: Solvraevene/Info.plist
-      properties:
-        CFBundleDisplayName: "Sølvrævene"
-        CFBundleIconName: AppIcon
-        ITSAppUsesNonExemptEncryption: false
-        UIRequiresFullScreen: true
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-
     settings:
       PRODUCT_NAME: Solvraevene
       PRODUCT_BUNDLE_IDENTIFIER: dk.haugaard.solvraevene
