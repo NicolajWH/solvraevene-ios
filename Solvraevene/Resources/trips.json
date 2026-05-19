@@ -2,7 +2,7 @@
   { "date": "2025-05-17", "location": "London", "photoAlbumURL": null, "organizers": ["DM","NWH"] },
   { "date": "2024-10-25", "location": "København", "photoAlbumURL": null, "organizers": ["MC","MSA"] },
   { "date": "2024-05-03", "location": null, "photoAlbumURL": null, "organizers": ["PHA","MR"] },
-  { "date": "2023-09-21", "location": "Münich", "photoAlbumURL": null, "organizers": ["PHA","MR","DM","MSA","NWH","MC"] }
+  { "date": "2023-09-21", "location": "Münich", "photoAlbumURL": null, "organizers": ["PHA","MR","DM","MSA","NWH","MC"] },
   { "date": "2022-10-28", "location": "Krakow", "photoAlbumURL": null, "organizers": ["MR","MC"] },
   { "date": "2022-04-30", "location": "Søndervig", "photoAlbumURL": null, "organizers": ["DM","MSA"] },
   { "date": "2021-10-29", "location": "Prag", "photoAlbumURL": null, "organizers": ["PHA","NWH"] },
