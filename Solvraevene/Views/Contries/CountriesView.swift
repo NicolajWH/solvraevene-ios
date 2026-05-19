@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct CountriesView: View {
-    let trips = DataService.loadTrips()
+    @Environment(TripStore.self) private var store
 
     var countryCounts: [(country: String, count: Int)] {
-        StatsService.countryCounts(from: trips)
+        StatsService.countryCounts(from: store.trips)
     }
 
     var body: some View {

@@ -2,7 +2,7 @@ import SwiftUI
 import MapKit
 
 struct TripMapView: View {
-    let trips = DataService.loadTrips()
+    @Environment(TripStore.self) private var store
 
     @State private var position = MapCameraPosition.region(
         MKCoordinateRegion(
@@ -12,15 +12,15 @@ struct TripMapView: View {
     )
 
     var tripsWithCoordinates: [Trip] {
-        trips.filter { $0.coordinate != nil }
+        store.trips.filter { $0.coordinate != nil }
     }
 
     var body: some View {
         Map(position: $position) {
             ForEach(tripsWithCoordinates) { trip in
-                Annotation(trip.location, coordinate: trip.coordinate!) {
+                Annotation(trip.location ?? trip.formattedDate, coordinate: trip.coordinate!) {
                     VStack(spacing: 4) {
-                        Text(trip.location)
+                        Text(trip.location ?? trip.formattedDate)
                             .font(.caption)
                             .padding(6)
                             .background(.ultraThinMaterial)

@@ -1,14 +1,31 @@
 import SwiftUI
 
 struct HomeView: View {
-    let trips = DataService.loadTrips()
+    @Environment(TripStore.self) private var store
 
     var futureTrips: [Trip] {
-        trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
+        store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
     }
 
     var body: some View {
         List {
+            if let error = store.errorMessage {
+                Section {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                }
+            }
+
+            if store.isLoading {
+                Section {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                        Text("Henter ture…")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             Section("Kommende ture") {
                 if futureTrips.isEmpty {
                     Text("Ingen kommende ture")
@@ -16,12 +33,14 @@ struct HomeView: View {
                 } else {
                     ForEach(futureTrips) { trip in
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(formattedDate(trip.date))
+                            Text(trip.formattedDate)
                                 .font(.headline)
                             Text(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))
                                 .font(.subheadline)
-                            Text(trip.location)
-                                .foregroundStyle(.secondary)
+                            if let location = trip.location {
+                                Text(location)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         .padding(.vertical, 4)
                     }
@@ -29,7 +48,7 @@ struct HomeView: View {
             }
 
             Section("Arrangør-statistik") {
-                ForEach(StatsService.organizerCounts(from: trips), id: \.initials) { item in
+                ForEach(StatsService.organizerCounts(from: store.trips), id: \.initials) { item in
                     HStack {
                         Text(item.name)
                         Spacer()
@@ -40,15 +59,5 @@ struct HomeView: View {
             }
         }
         .navigationTitle("Sølvrævene")
-    }
-
-    private func formattedDate(_ dateString: String) -> String {
-        let input = DateFormatter()
-        input.dateFormat = "yyyy-MM-dd"
-        let output = DateFormatter()
-        output.dateStyle = .long
-        output.locale = Locale(identifier: "da_DK")
-        guard let date = input.date(from: dateString) else { return dateString }
-        return output.string(from: date)
     }
 }

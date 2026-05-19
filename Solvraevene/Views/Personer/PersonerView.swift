@@ -1,14 +1,29 @@
 import SwiftUI
 
 struct PersonerView: View {
-    let trips = DataService.loadTrips()
+    @Environment(TripStore.self) private var store
 
     var stats: [(name: String, initials: String, count: Int)] {
-        StatsService.organizerCounts(from: trips)
+        StatsService.organizerCounts(from: store.trips)
     }
 
-    var minCount: Int {
-        stats.map { $0.count }.min() ?? 0
+    // Exactly one person gets the badge: fewest trips, tiebreaker = oldest last trip date
+    var nextUpInitials: String? {
+        guard !stats.isEmpty else { return nil }
+        let minCount = stats.map { $0.count }.min()!
+        let candidates = stats.filter { $0.count == minCount }
+        if candidates.count == 1 { return candidates[0].initials }
+
+        func lastTripDate(for initials: String) -> String {
+            store.trips
+                .filter { $0.organizers.contains(initials) }
+                .map { $0.date }
+                .max() ?? "0000-00-00"
+        }
+
+        return candidates
+            .min { lastTripDate(for: $0.initials) < lastTripDate(for: $1.initials) }?
+            .initials
     }
 
     var body: some View {
@@ -25,7 +40,7 @@ struct PersonerView: View {
                             HStack {
                                 Text(item.name)
                                     .font(.headline)
-                                if item.count == minCount {
+                                if item.initials == nextUpInitials {
                                     Text("På tur snart!")
                                         .font(.caption)
                                         .padding(.horizontal, 8)
