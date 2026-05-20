@@ -25,7 +25,7 @@ struct PersonerView: View {
 
     var body: some View {
         List {
-            Section("Arrangører") {
+            Section("Brødre") {
                 ForEach(Array(stats.enumerated()), id: \.element.initials) { index, item in
                     NavigationLink(destination: PersonTripsView(
                         initials: item.initials,
@@ -34,30 +34,33 @@ struct PersonerView: View {
                     )) {
                         HStack(spacing: 12) {
                             Text("\(index + 1)")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                                .frame(width: 24)
+                                .frame(width: 20)
 
-                            OrganizerAvatar(initials: item.initials)
+                            OrganizerAvatar(initials: item.initials, size: 40)
 
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(item.name)
+                                    .font(.subheadline.weight(.semibold))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                                 HStack(spacing: 6) {
-                                    Text(item.name)
-                                        .font(.headline)
+                                    Text(item.initials)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                     if nextOrganizers.contains(item.initials) {
                                         badge("Formand", color: .blue)
                                     } else if secondOrganizers.contains(item.initials) {
                                         badge("Kommende formand", color: .teal)
                                     }
                                 }
-                                Text(item.initials)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
                             }
 
                             Spacer()
 
-                            Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
+                            Text("\(item.count)")
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
@@ -65,13 +68,13 @@ struct PersonerView: View {
                 }
             }
         }
-        .navigationTitle("Personer")
+        .navigationTitle("Brødre")
     }
 
     private func badge(_ label: String, color: Color) -> some View {
         Text(label)
-            .font(.caption)
-            .padding(.horizontal, 8)
+            .font(.caption2.weight(.medium))
+            .padding(.horizontal, 7)
             .padding(.vertical, 2)
             .background(color.opacity(0.15))
             .foregroundStyle(color)

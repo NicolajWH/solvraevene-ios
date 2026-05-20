@@ -64,13 +64,6 @@ struct HomeView: View {
                     }
                 }
 
-                HStack(spacing: 12) {
-                    statTile(value: "\(pastTrips.count)", label: "Ture gennemført", icon: "figure.walk.departure", color: .blue)
-                    statTile(value: "\(countryCount)", label: "Lande besøgt", icon: "globe.europe.africa.fill", color: .green)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 24)
-
                 NavigationLink(destination: StatsView()) {
                     HStack {
                         Label("Se statistik", systemImage: "chart.bar.fill")
@@ -86,7 +79,7 @@ struct HomeView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 16)
-                .padding(.top, 12)
+                .padding(.top, 20)
 
                 if let trip = lastTrip {
                     sectionHeader("Seneste tur")
@@ -103,7 +96,7 @@ struct HomeView: View {
         .navigationTitle("Sølvrævene")
     }
 
-    // MARK: - Hero card (next upcoming trip)
+    // MARK: - Hero card
 
     private func heroCard(_ trip: Trip) -> some View {
         ZStack(alignment: .bottomLeading) {
@@ -112,7 +105,7 @@ struct HomeView: View {
                 .frame(minHeight: 200)
                 .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Spacer()
                 if let location = trip.location {
                     Text(location)
@@ -123,16 +116,13 @@ struct HomeView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white.opacity(0.85))
 
-                HStack(spacing: -6) {
+                HStack(spacing: 6) {
                     ForEach(trip.organizers, id: \.self) { initials in
-                        ZStack {
-                            Circle().fill(.white.opacity(0.25))
-                            Text(initials)
-                                .font(.system(size: 11, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                        }
-                        .frame(width: 30, height: 30)
-                        .overlay(Circle().stroke(.white.opacity(0.4), lineWidth: 1))
+                        OrganizerAvatar(initials: initials, size: 32)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 32 * 0.28)
+                                    .stroke(.white.opacity(0.5), lineWidth: 1.5)
+                            )
                     }
                 }
                 .padding(.top, 2)
@@ -143,7 +133,7 @@ struct HomeView: View {
         .padding(.horizontal, 16)
     }
 
-    // MARK: - Compact card (secondary trip / last trip)
+    // MARK: - Compact card
 
     private func compactCard(_ trip: Trip) -> some View {
         HStack(alignment: .center, spacing: 14) {
@@ -156,10 +146,9 @@ struct HomeView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            HStack(spacing: -8) {
+            HStack(spacing: 4) {
                 ForEach(trip.organizers, id: \.self) { initials in
                     OrganizerAvatar(initials: initials, size: 30)
-                        .overlay(Circle().stroke(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
                 }
             }
             Image(systemName: "chevron.right")
@@ -189,22 +178,5 @@ struct HomeView: View {
             .padding(.horizontal, 16)
             .padding(.top, 28)
             .padding(.bottom, 10)
-    }
-
-    private func statTile(value: String, label: String, icon: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-                .font(.title3)
-            Text(value)
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
