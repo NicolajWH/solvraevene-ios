@@ -1,6 +1,6 @@
 [
   { "date": "2033-10-28", "endDate": "2033-10-30", "location": null, "photoAlbumURL": null, "organizers": ["MC","PHA"] },
-  { "date": "2033-04-22", "endDate": "2033-04-24", "location": null, "photoAlbumURL": null, "organizers": ["MC","MR"] },
+  { "date": "2033-04-22", "endDate": "2033-04-24", "location": null, "photoAlbumURL": null, "organizers": ["DM","MC"] },
   { "date": "2032-10-29", "endDate": "2032-10-31", "location": null, "photoAlbumURL": null, "organizers": ["DM","NWH"] },
   { "date": "2032-04-23", "endDate": "2032-04-25", "location": null, "photoAlbumURL": null, "organizers": ["NWH","MSA"] },
   { "date": "2031-10-24", "endDate": "2031-10-26", "location": null, "photoAlbumURL": null, "organizers": ["PHA","MR"] },
