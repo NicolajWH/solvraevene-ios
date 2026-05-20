@@ -74,7 +74,7 @@ struct PairMatrixView: View {
                     .overlay(
                         Text(count == 0 ? "–" : "\(count)")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(count == 0 ? .secondary : .white)
+                            .foregroundStyle(count == 0 ? Color.white.opacity(0.35) : Color.white)
                     )
             }
             .buttonStyle(.plain)
