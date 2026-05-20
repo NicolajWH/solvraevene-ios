@@ -3,9 +3,15 @@ import SwiftUI
 struct PairMatrixView: View {
     let people: [String]
     let pairs: [String: [String: Int]]
+    let onTap: (_ a: String, _ b: String) -> Void
 
     private var maxCount: Int {
         pairs.values.flatMap { $0.values }.max() ?? 1
+    }
+
+    private var minNonZeroCount: Int {
+        let all = pairs.values.flatMap { $0.values }.filter { $0 > 0 }
+        return all.min() ?? 0
     }
 
     private let cellSpacing: CGFloat = 4
@@ -15,7 +21,7 @@ struct PairMatrixView: View {
         VStack(spacing: cellSpacing) {
             // Header row
             HStack(spacing: cellSpacing) {
-                cornerCell()
+                Color.clear.frame(width: cellSize, height: 22)
                 ForEach(people, id: \.self) { p in
                     Text(p)
                         .font(.caption2.weight(.semibold))
@@ -40,32 +46,39 @@ struct PairMatrixView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func cornerCell() -> some View {
-        Color.clear.frame(width: cellSize, height: 22)
-    }
-
+    @ViewBuilder
     private func cell(row: String, col: String) -> some View {
-        Group {
-            if row == col {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(uiColor: .tertiarySystemFill))
-                    .frame(width: cellSize, height: cellSize)
-                    .overlay(
-                        Image(systemName: "minus")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                    )
-            } else {
-                let count = pairs[row]?[col] ?? 0
+        if row == col {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(uiColor: .tertiarySystemFill))
+                .frame(width: cellSize, height: cellSize)
+                .overlay(
+                    Image(systemName: "minus")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                )
+        } else {
+            let count = pairs[row]?[col] ?? 0
+            let needsCatchup = count > 0 && count == minNonZeroCount
+
+            Button {
+                onTap(row, col)
+            } label: {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(intensity(for: count))
                     .frame(width: cellSize, height: cellSize)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .strokeBorder(Color.orange, lineWidth: needsCatchup ? 2 : 0)
+                    )
                     .overlay(
                         Text(count == 0 ? "–" : "\(count)")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(count == 0 ? .secondary : .white)
                     )
             }
+            .buttonStyle(.plain)
+            .disabled(count == 0)
         }
     }
 

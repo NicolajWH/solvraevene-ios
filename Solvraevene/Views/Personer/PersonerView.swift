@@ -3,9 +3,31 @@ import Charts
 
 struct PersonerView: View {
     @Environment(TripStore.self) private var store
+    @State private var selectedPair: PairSelection?
 
     var pastTrips: [Trip] {
         store.trips.filter { !$0.isFuture }
+    }
+
+    private var pairMatrix: [String: [String: Int]] {
+        StatsService.pairCounts(from: pastTrips)
+    }
+
+    /// Pair with the highest joint count.
+    private var topPair: (a: String, b: String, count: Int)? {
+        let people = sortedStats.map { $0.initials }
+        var best: (String, String, Int)?
+        for i in 0..<people.count {
+            for j in (i+1)..<people.count {
+                let a = people[i], b = people[j]
+                let c = pairMatrix[a]?[b] ?? 0
+                if best == nil || c > best!.2 {
+                    best = (a, b, c)
+                }
+            }
+        }
+        guard let b = best else { return nil }
+        return (a: b.0, b: b.1, count: b.2)
     }
 
     var stats: [(name: String, initials: String, count: Int)] {
@@ -103,18 +125,50 @@ struct PersonerView: View {
             }
 
             Section {
+                if let top = topPair {
+                    HStack(spacing: 10) {
+                        Image(systemName: "trophy.fill")
+                            .foregroundStyle(.orange)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Mest aktive par")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text("\(Organizer.fullName(for: top.a)) & \(Organizer.fullName(for: top.b))")
+                                .font(.subheadline.weight(.semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        Spacer()
+                        Text("\(top.count) ture")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 PairMatrixView(
                     people: sortedStats.map { $0.initials },
-                    pairs: StatsService.pairCounts(from: pastTrips)
-                )
+                    pairs: pairMatrix
+                ) { a, b in
+                    selectedPair = PairSelection(a: a, b: b)
+                }
                 .padding(.vertical, 8)
             } header: {
                 Text("Hvor mange gange har de arrangeret sammen?")
             } footer: {
-                Text("Tallet er antal fælles ture. Mørk celle = mange ture sammen.")
+                Text("Orange ramme = par der mangler en runde. Tryk på en celle for at se de fælles ture.")
             }
         }
         .navigationTitle("Brødre")
+        .navigationDestination(item: $selectedPair) { pair in
+            PairTripsView(
+                a: pair.a,
+                b: pair.b,
+                trips: pastTrips.filter {
+                    $0.organizers.contains(pair.a) && $0.organizers.contains(pair.b)
+                }
+            )
+        }
     }
 
     private func badge(_ label: String, color: Color) -> some View {
