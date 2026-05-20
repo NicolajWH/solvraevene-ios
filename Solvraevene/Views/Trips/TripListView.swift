@@ -18,6 +18,12 @@ struct TripListView: View {
         return futureTrips.filter { matches($0) }
     }
 
+    var futureByYear: [(year: String, trips: [Trip])] {
+        let base = searchText.isEmpty ? futureTrips : futureTrips.filter { matches($0) }
+        let grouped = Dictionary(grouping: base) { String($0.date.prefix(4)) }
+        return grouped.map { (year: $0.key, trips: $0.value) }.sorted { $0.year < $1.year }
+    }
+
     var pastByYear: [(year: String, trips: [Trip])] {
         let base = searchText.isEmpty ? pastTrips : pastTrips.filter { matches($0) }
         let grouped = Dictionary(grouping: base) { String($0.date.prefix(4)) }
@@ -31,10 +37,12 @@ struct TripListView: View {
             }
 
             if showFuture {
-                Section("Kommende ture") {
-                    ForEach(filteredFuture) { trip in
-                        NavigationLink(destination: TripDetailView(trip: trip)) {
-                            tripRow(trip)
+                ForEach(futureByYear, id: \.year) { group in
+                    Section(group.year) {
+                        ForEach(group.trips) { trip in
+                            NavigationLink(destination: TripDetailView(trip: trip)) {
+                                tripRow(trip)
+                            }
                         }
                     }
                 }

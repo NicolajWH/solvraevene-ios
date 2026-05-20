@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: Int
     @Environment(TripStore.self) private var store
 
     var nextTrips: [Trip] {
@@ -64,6 +65,32 @@ struct HomeView: View {
                     }
                 }
 
+                // Stats tiles
+                HStack(spacing: 12) {
+                    statTile(
+                        value: pastTrips.count,
+                        label: "Ture gennemført",
+                        icon: "figure.walk.departure",
+                        color: .blue
+                    )
+                    statTile(
+                        value: countryCount,
+                        label: "Lande besøgt",
+                        icon: "globe.europe.africa.fill",
+                        color: .green
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 24)
+
+                // Quick navigation
+                HStack(spacing: 12) {
+                    quickLink(label: "Alle ture", icon: "calendar", tab: 1)
+                    quickLink(label: "Lande", icon: "flag.fill", tab: 3)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
                 NavigationLink(destination: StatsView()) {
                     HStack {
                         Label("Se statistik", systemImage: "chart.bar.fill")
@@ -79,7 +106,7 @@ struct HomeView: View {
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
+                .padding(.top, 12)
 
                 if let trip = lastTrip {
                     sectionHeader("Seneste tur")
@@ -163,6 +190,44 @@ struct HomeView: View {
         .padding(.vertical, 2)
     }
 
+    // MARK: - Stat tile with counting animation
+
+    private func statTile(value: Int, label: String, icon: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(.title3)
+            CountingText(target: value)
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Quick navigation
+
+    private func quickLink(label: String, icon: String, tab: Int) -> some View {
+        Button { selectedTab = tab } label: {
+            HStack {
+                Label(label, systemImage: icon)
+                    .font(.subheadline.weight(.medium))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.tertiary)
+                    .font(.caption)
+            }
+            .padding()
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Helpers
 
     private func tripGradient(_ trip: Trip) -> LinearGradient {
@@ -178,5 +243,31 @@ struct HomeView: View {
             .padding(.horizontal, 16)
             .padding(.top, 28)
             .padding(.bottom, 10)
+    }
+}
+
+// MARK: - Counting animation
+
+private struct CountingText: View {
+    let target: Int
+    var font: Font = .body
+    @State private var displayed = 0
+
+    var body: some View {
+        Text("\(displayed)")
+            .font(font)
+            .contentTransition(.numericText())
+            .onAppear { animate(to: target) }
+            .onChange(of: target) { _, new in animate(to: new) }
+    }
+
+    private func animate(to value: Int) {
+        displayed = 0
+        guard value > 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.easeOut(duration: 0.9)) {
+                displayed = value
+            }
+        }
     }
 }
