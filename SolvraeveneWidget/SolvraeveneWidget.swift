@@ -117,84 +117,91 @@ struct WidgetEntryView: View {
     var entry: NextTripEntry
     @Environment(\.widgetFamily) var family
 
+    private let bg = Color(red: 0.06, green: 0.07, blue: 0.09)
+    private let cardStroke = Color.white.opacity(0.06)
+    private let accent = Color(red: 0.78, green: 0.78, blue: 0.84)
+    private let textPrimary = Color.white
+    private let textSecondary = Color.white.opacity(0.6)
+
+    private var isSmall: Bool { family == .systemSmall }
+
     var body: some View {
         if let trip = entry.nextTrip {
             VStack(alignment: .leading, spacing: 4) {
                 Text("NÆSTE TUR")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .tracking(0.5)
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(textSecondary)
 
                 if let location = trip.location {
                     Text(location)
-                        .font(family == .systemSmall ? .headline : .title3.bold())
+                        .font(.system(size: isSmall ? 16 : 22, weight: .bold))
+                        .foregroundStyle(textPrimary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
 
                 Text(trip.dateRange)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .font(.system(size: isSmall ? 10 : 12))
+                    .foregroundStyle(textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 if let countdown = trip.countdown {
                     Text(countdown)
                         .font(.system(
-                            size: family == .systemSmall ? 17 : 22,
+                            size: isSmall ? 20 : 26,
                             weight: .bold,
                             design: .rounded
                         ))
-                        .foregroundStyle(.primary)
-                        .padding(.top, 4)
+                        .foregroundStyle(accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .padding(.top, 2)
                 }
 
                 Spacer(minLength: 0)
 
                 HStack(spacing: -6) {
                     ForEach(trip.organizers, id: \.self) { initials in
-                        avatarView(initials: initials, size: family == .systemSmall ? 22 : 28)
+                        avatarView(initials: initials, size: isSmall ? 22 : 28)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding()
-            .containerBackground(.fill.tertiary, for: .widget)
+            .padding(isSmall ? 12 : 16)
+            .containerBackground(for: .widget) { bg }
         } else {
             VStack(spacing: 8) {
                 Image(systemName: "figure.walk.departure")
                     .font(.title2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(textSecondary)
                 Text("Ingen kommende ture")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(textSecondary)
                     .multilineTextAlignment(.center)
             }
-            .containerBackground(.fill.tertiary, for: .widget)
+            .containerBackground(for: .widget) { bg }
         }
     }
 
     private func avatarView(initials: String, size: CGFloat) -> some View {
         ZStack {
-            Circle().fill(avatarColor(for: initials))
-            Text(initials)
-                .font(.system(size: size * 0.36, weight: .semibold))
-                .foregroundStyle(.white)
+            if let ui = UIImage(named: "profile_\(initials)") {
+                Image(uiImage: ui)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            } else {
+                Circle().fill(Color.white)
+                Text(initials)
+                    .font(.system(size: size * 0.34, weight: .semibold, design: .rounded))
+                    .foregroundStyle(bg)
+            }
         }
         .frame(width: size, height: size)
-        .overlay(Circle().stroke(.background, lineWidth: 1.5))
-    }
-
-    private func avatarColor(for initials: String) -> Color {
-        switch initials {
-        case "DM":  return Color(red: 0.12, green: 0.53, blue: 0.72)
-        case "NWH": return Color(red: 0.33, green: 0.31, blue: 0.76)
-        case "MC":  return Color(red: 0.15, green: 0.58, blue: 0.28)
-        case "MSA": return Color(red: 0.86, green: 0.45, blue: 0.14)
-        case "PHA": return Color(red: 0.80, green: 0.20, blue: 0.24)
-        case "MR":  return Color(red: 0.55, green: 0.18, blue: 0.76)
-        default:
-            let hue = Double(initials.unicodeScalars.reduce(0) { ($0 + Int($1.value)) % 360 }) / 360.0
-            return Color(hue: hue, saturation: 0.65, brightness: 0.75)
-        }
+        .overlay(Circle().stroke(bg, lineWidth: 2))
     }
 }
 
