@@ -11,6 +11,8 @@ struct TripMapView: View {
         )
     )
 
+    @State private var selectedTrip: Trip?
+
     var tripsWithCoordinates: [Trip] {
         store.trips.filter { $0.coordinate != nil }
     }
@@ -19,20 +21,36 @@ struct TripMapView: View {
         Map(position: $position) {
             ForEach(tripsWithCoordinates) { trip in
                 Annotation(trip.location ?? trip.formattedDate, coordinate: trip.coordinate!) {
-                    VStack(spacing: 4) {
-                        Text(trip.location ?? trip.formattedDate)
-                            .font(.caption)
-                            .padding(6)
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    Button {
+                        selectedTrip = trip
+                    } label: {
+                        VStack(spacing: 4) {
+                            Text(trip.location ?? trip.formattedDate)
+                                .font(.caption)
+                                .padding(6)
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundStyle(.red)
-                            .font(.title)
+                            Image(systemName: "mappin.circle.fill")
+                                .foregroundStyle(.red)
+                                .font(.title)
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
         .navigationTitle("Kort")
+        .sheet(item: $selectedTrip) { trip in
+            NavigationStack {
+                TripDetailView(trip: trip)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Luk") { selectedTrip = nil }
+                        }
+                    }
+            }
+            .presentationDetents([.medium, .large])
+        }
     }
 }

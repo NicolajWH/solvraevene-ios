@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TripListView: View {
     @Environment(TripStore.self) private var store
-    @State private var showFuture = true
+    @State private var showFuture = false
 
     var futureTrips: [Trip] {
         store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
@@ -13,22 +13,20 @@ struct TripListView: View {
     }
 
     var body: some View {
-        List(showFuture ? futureTrips : pastTrips) { trip in
-            NavigationLink(destination: TripDetailView(trip: trip)) {
-                tripRow(trip)
+        List {
+            Section {
+                Toggle("Vis kommende ture", isOn: $showFuture)
+            }
+
+            Section(showFuture ? "Kommende ture" : "Tidligere ture") {
+                ForEach(showFuture ? futureTrips : pastTrips) { trip in
+                    NavigationLink(destination: TripDetailView(trip: trip)) {
+                        tripRow(trip)
+                    }
+                }
             }
         }
         .navigationTitle("Ture")
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("", selection: $showFuture) {
-                    Text("Kommende").tag(true)
-                    Text("Tidligere").tag(false)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 200)
-            }
-        }
     }
 
     private func tripRow(_ trip: Trip) -> some View {
