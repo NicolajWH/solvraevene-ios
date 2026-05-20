@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct PersonerView: View {
     @Environment(TripStore.self) private var store
@@ -62,13 +63,43 @@ struct PersonerView: View {
 
                             Spacer()
 
-                            Text("\(item.count)")
+                            Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
                     }
                 }
+            } footer: {
+                Text("Tallet viser hvor mange ture broderen har arrangeret.")
+            }
+
+            Section("Ture arrangeret") {
+                Chart(sortedStats, id: \.initials) { item in
+                    BarMark(
+                        x: .value("Antal", item.count),
+                        y: .value("Bror", item.initials)
+                    )
+                    .foregroundStyle(Color.accentColor.gradient)
+                    .cornerRadius(4)
+                    .annotation(position: .trailing, alignment: .leading) {
+                        Text("\(item.count)")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .chartXAxis(.hidden)
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisValueLabel {
+                            if let initials = value.as(String.self) {
+                                Text(initials).font(.caption2)
+                            }
+                        }
+                    }
+                }
+                .frame(height: CGFloat(sortedStats.count) * 28 + 16)
+                .padding(.vertical, 8)
             }
         }
         .navigationTitle("Brødre")
