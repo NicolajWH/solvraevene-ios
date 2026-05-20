@@ -24,20 +24,24 @@ struct StatsView: View {
     var body: some View {
         List {
             Section("Ture per år") {
-                Chart(tripsByYear, id: \.year) { item in
-                    BarMark(
-                        x: .value("År", item.year),
-                        y: .value("Ture", item.count)
-                    )
-                    .foregroundStyle(Color.blue.gradient)
-                    .cornerRadius(4)
-                }
-                .chartXAxis {
-                    AxisMarks { _ in
-                        AxisValueLabel().font(.caption2)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    Chart(tripsByYear, id: \.year) { item in
+                        BarMark(
+                            x: .value("År", item.year),
+                            y: .value("Ture", item.count)
+                        )
+                        .foregroundStyle(Color.blue.gradient)
+                        .cornerRadius(4)
                     }
+                    .chartXAxis {
+                        AxisMarks { _ in
+                            AxisGridLine()
+                            AxisTick()
+                            AxisValueLabel().font(.caption2)
+                        }
+                    }
+                    .frame(width: CGFloat(tripsByYear.count) * 36, height: 180)
                 }
-                .frame(height: 180)
                 .padding(.vertical, 8)
             }
 

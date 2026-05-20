@@ -11,22 +11,13 @@ struct PersonerView: View {
         StatsService.organizerCounts(from: pastTrips)
     }
 
-    var nextUpInitials: String? {
-        guard !stats.isEmpty else { return nil }
-        let minCount = stats.map { $0.count }.min()!
-        let candidates = stats.filter { $0.count == minCount }
-        if candidates.count == 1 { return candidates[0].initials }
-
-        func lastTripDate(for initials: String) -> String {
-            pastTrips
-                .filter { $0.organizers.contains(initials) }
-                .map { $0.date }
-                .max() ?? "0000-00-00"
-        }
-
-        return candidates
-            .min { lastTripDate(for: $0.initials) < lastTripDate(for: $1.initials) }?
-            .initials
+    var nextTripOrganizers: Set<String> {
+        guard let nextTrip = store.trips
+            .filter({ $0.isFuture })
+            .sorted(by: { $0.date < $1.date })
+            .first
+        else { return [] }
+        return Set(nextTrip.organizers)
     }
 
     var body: some View {
@@ -50,13 +41,13 @@ struct PersonerView: View {
                                 HStack {
                                     Text(item.name)
                                         .font(.headline)
-                                    if item.initials == nextUpInitials {
-                                        Text("På tur snart!")
+                                    if nextTripOrganizers.contains(item.initials) {
+                                        Text("Næste tur")
                                             .font(.caption)
                                             .padding(.horizontal, 8)
                                             .padding(.vertical, 2)
-                                            .background(Color.orange.opacity(0.2))
-                                            .foregroundStyle(.orange)
+                                            .background(Color.blue.opacity(0.15))
+                                            .foregroundStyle(.blue)
                                             .clipShape(Capsule())
                                     }
                                 }
@@ -75,9 +66,6 @@ struct PersonerView: View {
                 }
             } header: {
                 Text("Arrangører")
-            } footer: {
-                Text("Den med færrest ture arrangerer næste tur.")
-                    .font(.caption)
             }
         }
         .navigationTitle("Personer")
