@@ -10,30 +10,28 @@ struct TripDetailView: View {
     var body: some View {
         List {
             Section {
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     if let country = trip.country {
                         Text(flag(for: country))
                             .font(.system(size: 52))
-                    }
-
-                    if let location = trip.location {
-                        Text(location)
-                            .font(.title2.bold())
-                            .multilineTextAlignment(.center)
                     }
 
                     Text(trip.formattedDateRange)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
-                    VStack(spacing: 4) {
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 10) {
                         ForEach(trip.organizers, id: \.self) { initials in
-                            Text(Organizer.fullName(for: initials))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                            HStack(spacing: 12) {
+                                OrganizerAvatar(initials: initials, size: 34)
+                                Text(Organizer.fullName(for: initials))
+                                    .font(.body.weight(.medium))
+                            }
                         }
                     }
-                    .padding(.top, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
@@ -58,7 +56,7 @@ struct TripDetailView: View {
             }
         }
         .navigationTitle(trip.location ?? trip.formattedDate)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}
         } message: {
