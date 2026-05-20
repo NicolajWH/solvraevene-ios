@@ -13,13 +13,6 @@ platform :ios do
       in_house: false
     )
 
-    produce(
-      app_identifier: "dk.haugaard.solvraevene.widget",
-      app_name: "Solvraevene Widget",
-      skip_itc: true,
-      api_key: api_key
-    )
-
     match(
       type: "appstore",
       app_identifier: ["dk.haugaard.solvraevene", "dk.haugaard.solvraevene.widget"],
