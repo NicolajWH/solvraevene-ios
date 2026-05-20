@@ -3,8 +3,12 @@ import SwiftUI
 struct CountriesView: View {
     @Environment(TripStore.self) private var store
 
+    var pastTrips: [Trip] {
+        store.trips.filter { !$0.isFuture }
+    }
+
     var countryCounts: [(country: String, count: Int)] {
-        StatsService.countryCounts(from: store.trips.filter { !$0.isFuture })
+        StatsService.countryCounts(from: pastTrips)
     }
 
     var body: some View {
@@ -14,21 +18,26 @@ struct CountriesView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(countryCounts, id: \.country) { item in
-                    HStack(spacing: 12) {
-                        Text(flag(for: item.country))
-                            .font(.title2)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(countryName(for: item.country))
-                                .font(.headline)
-                            Text(item.country)
-                                .font(.caption)
+                    NavigationLink(destination: CountryTripsView(
+                        isoCode: item.country,
+                        trips: pastTrips.filter { $0.country == item.country }
+                    )) {
+                        HStack(spacing: 12) {
+                            Text(flag(for: item.country))
+                                .font(.title2)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(countryName(for: item.country))
+                                    .font(.headline)
+                                Text(item.country)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
                                 .foregroundStyle(.secondary)
                         }
-                        Spacer()
-                        Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
-                            .foregroundStyle(.secondary)
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                 }
             }
         }

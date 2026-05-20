@@ -11,7 +11,6 @@ struct PersonerView: View {
         StatsService.organizerCounts(from: pastTrips)
     }
 
-    // Exactly one person gets the badge: fewest trips, tiebreaker = oldest last trip date
     var nextUpInitials: String? {
         guard !stats.isEmpty else { return nil }
         let minCount = stats.map { $0.count }.min()!
@@ -34,37 +33,45 @@ struct PersonerView: View {
         List {
             Section {
                 ForEach(Array(stats.enumerated()), id: \.element.initials) { index, item in
-                    HStack(spacing: 12) {
-                        Text("\(index + 1)")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 24)
+                    NavigationLink(destination: PersonTripsView(
+                        initials: item.initials,
+                        name: item.name,
+                        trips: pastTrips.filter { $0.organizers.contains(item.initials) }
+                    )) {
+                        HStack(spacing: 12) {
+                            Text("\(index + 1)")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 24)
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack {
-                                Text(item.name)
-                                    .font(.headline)
-                                if item.initials == nextUpInitials {
-                                    Text("På tur snart!")
-                                        .font(.caption)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 2)
-                                        .background(Color.orange.opacity(0.2))
-                                        .foregroundStyle(.orange)
-                                        .clipShape(Capsule())
+                            OrganizerAvatar(initials: item.initials)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(item.name)
+                                        .font(.headline)
+                                    if item.initials == nextUpInitials {
+                                        Text("På tur snart!")
+                                            .font(.caption)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 2)
+                                            .background(Color.orange.opacity(0.2))
+                                            .foregroundStyle(.orange)
+                                            .clipShape(Capsule())
+                                    }
                                 }
+                                Text(item.initials)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                            Text(item.initials)
-                                .font(.caption)
+
+                            Spacer()
+
+                            Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
                                 .foregroundStyle(.secondary)
                         }
-
-                        Spacer()
-
-                        Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
-                            .foregroundStyle(.secondary)
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                 }
             } header: {
                 Text("Arrangører")

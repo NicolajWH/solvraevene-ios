@@ -11,16 +11,8 @@ struct HomeView: View {
         store.trips.filter { !$0.isFuture }
     }
 
-    var nextOrganizerName: String? {
-        let stats = StatsService.organizerCounts(from: pastTrips)
-        guard !stats.isEmpty else { return nil }
-        let minCount = stats.map { $0.count }.min()!
-        let candidates = stats.filter { $0.count == minCount }
-        if candidates.count == 1 { return candidates[0].name }
-        func lastTripDate(for initials: String) -> String {
-            pastTrips.filter { $0.organizers.contains(initials) }.map { $0.date }.max() ?? "0000-00-00"
-        }
-        return candidates.min { lastTripDate(for: $0.initials) < lastTripDate(for: $1.initials) }?.name
+    var lastTrip: Trip? {
+        pastTrips.sorted { $0.date > $1.date }.first
     }
 
     var body: some View {
@@ -48,13 +40,41 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(nextTrips) { trip in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(trip.formattedDateRange)
-                                .font(.headline)
-                            Text(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))
-                                .font(.subheadline)
-                            if let location = trip.location {
-                                Text(location)
+                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                            upcomingTripRow(trip)
+                        }
+                    }
+                }
+            }
+
+            Section("Fakta") {
+                LabeledContent {
+                    Text("\(pastTrips.count)").font(.headline)
+                } label: {
+                    Label("Ture gennemført", systemImage: "figure.walk.departure")
+                }
+                LabeledContent {
+                    Text("\(StatsService.countryCounts(from: pastTrips).count)").font(.headline)
+                } label: {
+                    Label("Lande besøgt", systemImage: "globe.europe.africa.fill")
+                }
+            }
+
+            if let trip = lastTrip {
+                Section("Seneste tur") {
+                    NavigationLink(destination: TripDetailView(trip: trip)) {
+                        HStack(alignment: .center, spacing: 12) {
+                            HStack(spacing: -10) {
+                                ForEach(trip.organizers, id: \.self) { initials in
+                                    OrganizerAvatar(initials: initials)
+                                        .overlay(Circle().stroke(Color(uiColor: .systemBackground), lineWidth: 2))
+                                }
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(trip.location ?? trip.formattedDate)
+                                    .font(.headline)
+                                Text(trip.formattedDateRange)
+                                    .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -62,15 +82,29 @@ struct HomeView: View {
                     }
                 }
             }
+        }
+        .navigationTitle("Sølvrævene")
+    }
 
-            Section("Fakta") {
-                LabeledContent("Ture gennemført", value: "\(pastTrips.count)")
-                LabeledContent("Lande besøgt", value: "\(StatsService.countryCounts(from: pastTrips).count)")
-                if let name = nextOrganizerName {
-                    LabeledContent("Næste arrangør", value: name)
+    private func upcomingTripRow(_ trip: Trip) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            HStack(spacing: -10) {
+                ForEach(trip.organizers, id: \.self) { initials in
+                    OrganizerAvatar(initials: initials)
+                        .overlay(Circle().stroke(Color(uiColor: .systemBackground), lineWidth: 2))
+                }
+            }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(trip.formattedDateRange)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                if let location = trip.location {
+                    Label(location, systemImage: "mappin.and.ellipse")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
             }
         }
-        .navigationTitle("Sølvrævene")
+        .padding(.vertical, 4)
     }
 }
