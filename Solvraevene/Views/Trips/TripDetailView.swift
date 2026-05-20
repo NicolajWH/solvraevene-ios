@@ -55,7 +55,7 @@ struct TripDetailView: View {
                 }
             }
         }
-        .navigationTitle(trip.location ?? trip.formattedDate)
+        .navigationTitle(trip.location ?? "Tur")
         .navigationBarTitleDisplayMode(.large)
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}

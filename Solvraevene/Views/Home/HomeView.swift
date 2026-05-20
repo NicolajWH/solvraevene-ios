@@ -62,19 +62,13 @@ struct HomeView: View {
                             .padding(.horizontal, 16)
                             .padding(.top, 4)
                     } else {
-                        if let first = nextTrips.first {
-                            NavigationLink(destination: TripDetailView(trip: first)) {
-                                heroCard(first)
+                        VStack(spacing: 10) {
+                            ForEach(nextTrips) { trip in
+                                NavigationLink(destination: TripDetailView(trip: trip)) {
+                                    upcomingCard(trip, prominent: trip.id == nextTrips.first?.id)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
-                        }
-
-                        if nextTrips.count > 1 {
-                            NavigationLink(destination: TripDetailView(trip: nextTrips[1])) {
-                                secondaryCard(nextTrips[1])
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.top, 10)
                         }
                     }
                 }
@@ -126,93 +120,33 @@ struct HomeView: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: - Hero card
+    // MARK: - Upcoming card (shared style, prominent = first trip)
 
-    private func heroCard(_ trip: Trip) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            // Base
-            RoundedRectangle(cornerRadius: 24)
-                .fill(cardBg)
-
-            // Subtle gradient sheen
-            RoundedRectangle(cornerRadius: 24)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.08),
-                            Color.clear,
-                            Color.black.opacity(0.25)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            // Country flag watermark
-            if let country = trip.country {
-                Text(flag(for: country))
-                    .font(.system(size: 140))
-                    .opacity(0.15)
-                    .offset(x: 80, y: -10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-            }
-
-            VStack(alignment: .leading, spacing: 14) {
-                Spacer()
-
-                if let location = trip.location {
-                    Text(location)
-                        .font(.system(size: 30, weight: .bold, design: .default))
-                        .foregroundStyle(textPrimary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-
-                Text(trip.formattedDateRange.uppercased())
-                    .font(.caption.weight(.semibold))
-                    .tracking(1.2)
-                    .foregroundStyle(accent)
-
-                HStack(spacing: -10) {
-                    ForEach(trip.organizers, id: \.self) { initials in
-                        OrganizerAvatar(initials: initials, size: 36)
-                            .overlay(Circle().stroke(cardBg, lineWidth: 2))
-                    }
-                }
-                .padding(.top, 4)
-            }
-            .padding(24)
-        }
-        .frame(minHeight: 220)
-        .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .strokeBorder(cardStroke, lineWidth: 1)
-        )
-        .padding(.horizontal, 16)
-        .shadow(color: .black.opacity(0.45), radius: 20, x: 0, y: 10)
-    }
-
-    // MARK: - Secondary card
-
-    private func secondaryCard(_ trip: Trip) -> some View {
+    private func upcomingCard(_ trip: Trip, prominent: Bool) -> some View {
         HStack(spacing: 14) {
-            if let country = trip.country {
-                Text(flag(for: country))
-                    .font(.title)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            // Flag or placeholder
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.06))
+                    .frame(width: prominent ? 52 : 44, height: prominent ? 52 : 44)
+                if let country = trip.country {
+                    Text(flag(for: country))
+                        .font(prominent ? .title : .title2)
+                } else {
+                    Image(systemName: "mappin")
+                        .foregroundStyle(accent)
+                        .font(prominent ? .title3 : .body)
+                }
             }
 
             VStack(alignment: .leading, spacing: 3) {
                 if let location = trip.location {
                     Text(location)
-                        .font(.headline)
+                        .font(prominent ? .headline : .subheadline.weight(.semibold))
                         .foregroundStyle(textPrimary)
                 }
                 Text(trip.formattedDateRange)
-                    .font(.subheadline)
+                    .font(prominent ? .subheadline : .caption)
                     .foregroundStyle(textSecondary)
             }
 
@@ -220,7 +154,7 @@ struct HomeView: View {
 
             HStack(spacing: -8) {
                 ForEach(trip.organizers, id: \.self) { initials in
-                    OrganizerAvatar(initials: initials, size: 28)
+                    OrganizerAvatar(initials: initials, size: prominent ? 32 : 28)
                         .overlay(Circle().stroke(cardBg, lineWidth: 2))
                 }
             }
@@ -229,12 +163,12 @@ struct HomeView: View {
                 .foregroundStyle(textTertiary)
                 .font(.caption)
         }
-        .padding(16)
+        .padding(prominent ? 18 : 14)
         .background(cardBg)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(cardStroke, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(prominent ? Color.white.opacity(0.10) : cardStroke, lineWidth: 1)
         )
         .padding(.horizontal, 16)
     }
@@ -327,8 +261,8 @@ struct HomeView: View {
             .tracking(1.5)
             .foregroundStyle(textSecondary)
             .padding(.horizontal, 16)
-            .padding(.top, 24)
-            .padding(.bottom, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 10)
     }
 
     // MARK: - Helpers
