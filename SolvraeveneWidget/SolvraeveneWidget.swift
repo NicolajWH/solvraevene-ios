@@ -5,6 +5,25 @@ struct TripSnapshot {
     let dateRange: String
     let location: String?
     let organizers: [String]
+    let countdown: String?
+}
+
+private func countdownLabel(forStart date: String) -> String? {
+    let f = DateFormatter()
+    f.dateFormat = "yyyy-MM-dd"
+    guard let start = f.date(from: date) else { return nil }
+    let cal = Calendar.current
+    let days = cal.dateComponents(
+        [.day],
+        from: cal.startOfDay(for: Date()),
+        to: cal.startOfDay(for: start)
+    ).day ?? 0
+    guard days >= 0 else { return nil }
+    switch days {
+    case 0: return "I dag"
+    case 1: return "I morgen"
+    default: return "Om \(days) dage"
+    }
 }
 
 struct NextTripEntry: TimelineEntry {
@@ -17,7 +36,8 @@ struct TripProvider: TimelineProvider {
         NextTripEntry(date: Date(), nextTrip: TripSnapshot(
             dateRange: "23.-25. oktober 2026",
             location: "Madrid",
-            organizers: ["MR", "NWH"]
+            organizers: ["MR", "NWH"],
+            countdown: "Om 156 dage"
         ))
     }
 
@@ -62,7 +82,8 @@ struct TripProvider: TimelineProvider {
         return NextTripEntry(date: Date(), nextTrip: TripSnapshot(
             dateRange: formatRange(date: t.date, endDate: t.endDate),
             location: t.location,
-            organizers: t.organizers
+            organizers: t.organizers,
+            countdown: countdownLabel(forStart: t.date)
         ))
     }
 
@@ -98,7 +119,7 @@ struct WidgetEntryView: View {
 
     var body: some View {
         if let trip = entry.nextTrip {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("NÆSTE TUR")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -115,11 +136,22 @@ struct WidgetEntryView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
 
+                if let countdown = trip.countdown {
+                    Text(countdown)
+                        .font(.system(
+                            size: family == .systemSmall ? 17 : 22,
+                            weight: .bold,
+                            design: .rounded
+                        ))
+                        .foregroundStyle(.primary)
+                        .padding(.top, 4)
+                }
+
                 Spacer(minLength: 0)
 
                 HStack(spacing: -6) {
                     ForEach(trip.organizers, id: \.self) { initials in
-                        avatarView(initials: initials, size: family == .systemSmall ? 24 : 30)
+                        avatarView(initials: initials, size: family == .systemSmall ? 22 : 28)
                     }
                 }
             }

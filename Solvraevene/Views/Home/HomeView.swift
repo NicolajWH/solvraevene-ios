@@ -132,6 +132,13 @@ struct HomeView: View {
                 Text(trip.formattedDateRange)
                     .font(.subheadline)
                     .foregroundStyle(textSecondary)
+                if let countdown = trip.countdownLabel {
+                    Text(countdown.uppercased())
+                        .font(.caption2.weight(.semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(accent)
+                        .padding(.top, 2)
+                }
             }
 
             Spacer()

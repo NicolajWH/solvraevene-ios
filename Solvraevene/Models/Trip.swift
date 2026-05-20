@@ -59,6 +59,28 @@ struct Trip: Identifiable, Codable {
         return f.string(from: Date())
     }
 
+    /// Days until the trip starts. nil if past, 0 if today.
+    var daysUntilStart: Int? {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let startDate = f.date(from: date) else { return nil }
+        let cal = Calendar.current
+        let startOfStart = cal.startOfDay(for: startDate)
+        let startOfToday = cal.startOfDay(for: Date())
+        let days = cal.dateComponents([.day], from: startOfToday, to: startOfStart).day ?? 0
+        return days >= 0 ? days : nil
+    }
+
+    /// Localized countdown like "Om 156 dage", "I morgen", "I dag".
+    var countdownLabel: String? {
+        guard let days = daysUntilStart else { return nil }
+        switch days {
+        case 0: return "I dag"
+        case 1: return "I morgen"
+        default: return "Om \(days) dage"
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
         case date, endDate, location, organizers, photoAlbumURL
     }
