@@ -4,12 +4,7 @@ import MapKit
 struct TripMapView: View {
     @Environment(TripStore.self) private var store
 
-    @State private var position = MapCameraPosition.region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 55.5, longitude: 10.0),
-            span: MKCoordinateSpan(latitudeDelta: 10, longitudeDelta: 10)
-        )
-    )
+    @State private var position: MapCameraPosition = .automatic
 
     @State private var selectedTrip: Trip?
 

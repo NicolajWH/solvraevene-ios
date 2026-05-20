@@ -30,14 +30,16 @@ struct TripListView: View {
     }
 
     private func tripRow(_ trip: Trip) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(trip.formattedDateRange)
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 3) {
             Text(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))
+                .font(.headline)
+            Text(trip.formattedDateRange)
                 .font(.subheadline)
+                .foregroundStyle(.secondary)
             if let location = trip.location {
-                Text(location)
-                    .foregroundStyle(.secondary)
+                Label(location, systemImage: "mappin.and.ellipse")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
         }
         .padding(.vertical, 4)

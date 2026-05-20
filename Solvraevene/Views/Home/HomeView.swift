@@ -7,6 +7,22 @@ struct HomeView: View {
         Array(store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }.prefix(2))
     }
 
+    var pastTrips: [Trip] {
+        store.trips.filter { !$0.isFuture }
+    }
+
+    var nextOrganizerName: String? {
+        let stats = StatsService.organizerCounts(from: pastTrips)
+        guard !stats.isEmpty else { return nil }
+        let minCount = stats.map { $0.count }.min()!
+        let candidates = stats.filter { $0.count == minCount }
+        if candidates.count == 1 { return candidates[0].name }
+        func lastTripDate(for initials: String) -> String {
+            pastTrips.filter { $0.organizers.contains(initials) }.map { $0.date }.max() ?? "0000-00-00"
+        }
+        return candidates.min { lastTripDate(for: $0.initials) < lastTripDate(for: $1.initials) }?.name
+    }
+
     var body: some View {
         List {
             if let error = store.errorMessage {
@@ -47,14 +63,11 @@ struct HomeView: View {
                 }
             }
 
-            Section("Arrangør-statistik") {
-                ForEach(StatsService.organizerCounts(from: store.trips.filter { !$0.isFuture }), id: \.initials) { item in
-                    HStack {
-                        Text(item.name)
-                        Spacer()
-                        Text("\(item.count)")
-                            .foregroundStyle(.secondary)
-                    }
+            Section("Fakta") {
+                LabeledContent("Ture gennemført", value: "\(pastTrips.count)")
+                LabeledContent("Lande besøgt", value: "\(StatsService.countryCounts(from: pastTrips).count)")
+                if let name = nextOrganizerName {
+                    LabeledContent("Næste arrangør", value: name)
                 }
             }
         }
