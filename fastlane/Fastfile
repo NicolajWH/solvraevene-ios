@@ -15,7 +15,7 @@ platform :ios do
 
     match(
       type: "appstore",
-      app_identifier: "dk.haugaard.solvraevene",
+      app_identifier: ["dk.haugaard.solvraevene", "dk.haugaard.solvraevene.widget"],
       git_url: ENV["MATCH_GIT_URL"],
       git_basic_authorization: Base64.strict_encode64("x-access-token:#{ENV['MATCH_GIT_TOKEN']}"),
       readonly: false,
@@ -34,7 +34,8 @@ build_app(
   disable_xcpretty: true,
   export_options: {
     provisioningProfiles: {
-      "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene"
+      "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene",
+      "dk.haugaard.solvraevene.widget" => "match AppStore dk.haugaard.solvraevene.widget"
     }
   }
 )

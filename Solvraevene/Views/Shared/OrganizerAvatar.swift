@@ -7,7 +7,7 @@ struct OrganizerAvatar: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(color(for: initials))
+                .fill(Self.color(for: initials))
             Text(initials)
                 .font(.system(size: size * 0.36, weight: .semibold))
                 .foregroundStyle(.white)
@@ -15,7 +15,7 @@ struct OrganizerAvatar: View {
         .frame(width: size, height: size)
     }
 
-    private func color(for initials: String) -> Color {
+    static func color(for initials: String) -> Color {
         let palette: [Color] = [
             Color(red: 0.40, green: 0.44, blue: 0.78),
             Color(red: 0.22, green: 0.60, blue: 0.42),

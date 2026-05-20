@@ -10,16 +10,43 @@ struct TripDetailView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Dato", value: trip.formattedDateRange)
-                if let location = trip.location {
-                    LabeledContent("Lokation", value: location)
-                }
-            }
+                VStack(spacing: 12) {
+                    if let country = trip.country {
+                        Text(flag(for: country))
+                            .font(.system(size: 52))
+                    } else {
+                        Image(systemName: "airplane")
+                            .font(.system(size: 40))
+                            .foregroundStyle(.secondary)
+                    }
 
-            Section("Arrangører") {
-                ForEach(trip.organizers, id: \.self) { initials in
-                    Text(Organizer.fullName(for: initials))
+                    if let location = trip.location {
+                        Text(location)
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Text(trip.formattedDateRange)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    HStack(spacing: 12) {
+                        ForEach(trip.organizers, id: \.self) { initials in
+                            VStack(spacing: 4) {
+                                OrganizerAvatar(initials: initials, size: 44)
+                                Text(firstName(for: initials))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                                    .frame(maxWidth: 60)
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
             }
 
             if let urlString = trip.photoAlbumURL, let url = URL(string: urlString) {
@@ -49,6 +76,17 @@ struct TripDetailView: View {
         }
     }
 
+    private func firstName(for initials: String) -> String {
+        Organizer.fullName(for: initials).components(separatedBy: " ").first ?? initials
+    }
+
+    private func flag(for isoCode: String) -> String {
+        isoCode.unicodeScalars
+            .compactMap { Unicode.Scalar(127397 + $0.value) }
+            .map { String($0) }
+            .joined()
+    }
+
     private func addToCalendar() {
         let eventStore = EKEventStore()
         Task {
@@ -70,7 +108,6 @@ struct TripDetailView: View {
                 let event = EKEvent(eventStore: eventStore)
                 event.title = trip.location.map { "Sølvrævene – \($0)" } ?? "Sølvrævene"
                 event.startDate = startDate
-                // All-day end date is exclusive, so add one day
                 event.endDate = Calendar.current.date(byAdding: .day, value: 1, to: endDate) ?? endDate
                 event.isAllDay = true
                 event.notes = "Arrangører: \(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))"

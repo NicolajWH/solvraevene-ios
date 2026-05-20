@@ -27,7 +27,7 @@ struct TripMapView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                             Image(systemName: "mappin.circle.fill")
-                                .foregroundStyle(.red)
+                                .foregroundStyle(trip.isFuture ? Color.blue : Color.red)
                                 .font(.title)
                         }
                     }
