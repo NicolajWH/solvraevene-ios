@@ -6,13 +6,29 @@ struct OrganizerAvatar: View {
 
     var body: some View {
         ZStack {
-            Circle()
-                .fill(Color(uiColor: .label))
-            Text(initials)
-                .font(.system(size: size * 0.36, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color(uiColor: .systemBackground))
+            if let image = profileImage {
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color(uiColor: .label))
+                Text(initials)
+                    .font(.system(size: size * 0.36, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color(uiColor: .systemBackground))
+            }
         }
         .frame(width: size, height: size)
+    }
+
+    private var profileImage: Image? {
+        let name = "profile_\(initials)"
+        if UIImage(named: name) != nil {
+            return Image(name)
+        }
+        return nil
     }
 
     static func color(for initials: String) -> Color {

@@ -4,6 +4,15 @@ struct HomeView: View {
     @Binding var selectedTab: Int
     @Environment(TripStore.self) private var store
 
+    // Palette
+    private let bg = Color(red: 0.06, green: 0.07, blue: 0.09)
+    private let cardBg = Color(red: 0.11, green: 0.12, blue: 0.15)
+    private let cardStroke = Color.white.opacity(0.06)
+    private let textPrimary = Color.white
+    private let textSecondary = Color.white.opacity(0.6)
+    private let textTertiary = Color.white.opacity(0.35)
+    private let accent = Color(red: 0.78, green: 0.78, blue: 0.84) // silver
+
     var nextTrips: [Trip] {
         Array(store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }.prefix(2))
     }
@@ -28,7 +37,7 @@ struct HomeView: View {
                         .foregroundStyle(.red)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.red.opacity(0.1))
+                        .background(Color.red.opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
@@ -36,20 +45,20 @@ struct HomeView: View {
 
                 if store.isLoading {
                     HStack(spacing: 10) {
-                        ProgressView()
-                        Text("Henter ture…").foregroundStyle(.secondary)
+                        ProgressView().tint(accent)
+                        Text("Henter ture…").foregroundStyle(textSecondary)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                 }
 
-                // MARK: Upcoming trips
+                // MARK: Upcoming
                 VStack(alignment: .leading, spacing: 0) {
                     sectionLabel("Kommende ture")
 
                     if nextTrips.isEmpty {
                         Text("Ingen kommende ture")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(textSecondary)
                             .padding(.horizontal, 16)
                             .padding(.top, 4)
                     } else {
@@ -77,8 +86,7 @@ struct HomeView: View {
                         statTile(
                             value: pastTrips.count,
                             label: "Ture gennemført",
-                            icon: "figure.walk.departure",
-                            color: .blue
+                            icon: "figure.walk.departure"
                         )
                     }
                     .buttonStyle(.plain)
@@ -87,8 +95,7 @@ struct HomeView: View {
                         statTile(
                             value: countryCount,
                             label: "Lande besøgt",
-                            icon: "globe.europe.africa.fill",
-                            color: .green
+                            icon: "globe.europe.africa.fill"
                         )
                     }
                     .buttonStyle(.plain)
@@ -110,187 +117,215 @@ struct HomeView: View {
             }
             .padding(.bottom, 48)
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(bg.ignoresSafeArea())
         .refreshable { await store.load() }
         .navigationTitle("Sølvrævene")
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbarBackground(bg, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .preferredColorScheme(.dark)
     }
 
-    // MARK: - Hero card (next trip)
+    // MARK: - Hero card
 
     private func heroCard(_ trip: Trip) -> some View {
         ZStack(alignment: .bottomLeading) {
+            // Base
             RoundedRectangle(cornerRadius: 24)
-                .fill(tripGradient(trip))
-                .frame(minHeight: 220)
+                .fill(cardBg)
 
-            // subtle dark overlay at bottom for text legibility
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.45)],
-                startPoint: .center,
-                endPoint: .bottom
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 24))
+            // Subtle gradient sheen
+            RoundedRectangle(cornerRadius: 24)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.08),
+                            Color.clear,
+                            Color.black.opacity(0.25)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
-            VStack(alignment: .leading, spacing: 10) {
+            // Country flag watermark
+            if let country = trip.country {
+                Text(flag(for: country))
+                    .font(.system(size: 140))
+                    .opacity(0.15)
+                    .offset(x: 80, y: -10)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+            }
+
+            VStack(alignment: .leading, spacing: 14) {
                 Spacer()
 
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        if let location = trip.location {
-                            Text(location)
-                                .font(.title.bold())
-                                .foregroundStyle(.white)
-                        }
-                        Text(trip.formattedDateRange)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
+                if let location = trip.location {
+                    Text(location)
+                        .font(.system(size: 30, weight: .bold, design: .default))
+                        .foregroundStyle(textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
 
-                    Spacer()
+                Text(trip.formattedDateRange.uppercased())
+                    .font(.caption.weight(.semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(accent)
 
-                    HStack(spacing: -8) {
-                        ForEach(trip.organizers, id: \.self) { initials in
-                            OrganizerAvatar(initials: initials, size: 36)
-                                .overlay(Circle().stroke(.white.opacity(0.6), lineWidth: 2))
-                        }
+                HStack(spacing: -10) {
+                    ForEach(trip.organizers, id: \.self) { initials in
+                        OrganizerAvatar(initials: initials, size: 36)
+                            .overlay(Circle().stroke(cardBg, lineWidth: 2))
                     }
                 }
+                .padding(.top, 4)
             }
-            .padding(22)
-            .frame(maxWidth: .infinity, minHeight: 220, alignment: .bottomLeading)
+            .padding(24)
         }
+        .frame(minHeight: 220)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(cardStroke, lineWidth: 1)
+        )
         .padding(.horizontal, 16)
-        .shadow(color: tripShadowColor(trip), radius: 18, x: 0, y: 8)
+        .shadow(color: .black.opacity(0.45), radius: 20, x: 0, y: 10)
     }
 
-    // MARK: - Secondary upcoming trip card
+    // MARK: - Secondary card
 
     private func secondaryCard(_ trip: Trip) -> some View {
-        HStack(spacing: 0) {
-            // Color stripe
-            RoundedRectangle(cornerRadius: 3)
-                .fill(tripGradient(trip))
-                .frame(width: 5)
-                .padding(.vertical, 12)
+        HStack(spacing: 14) {
+            if let country = trip.country {
+                Text(flag(for: country))
+                    .font(.title)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 if let location = trip.location {
                     Text(location)
                         .font(.headline)
+                        .foregroundStyle(textPrimary)
                 }
                 Text(trip.formattedDateRange)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(textSecondary)
             }
-            .padding(.horizontal, 14)
 
             Spacer()
 
-            HStack(spacing: -6) {
+            HStack(spacing: -8) {
                 ForEach(trip.organizers, id: \.self) { initials in
-                    OrganizerAvatar(initials: initials, size: 30)
-                        .overlay(Circle().stroke(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
+                    OrganizerAvatar(initials: initials, size: 28)
+                        .overlay(Circle().stroke(cardBg, lineWidth: 2))
                 }
             }
 
             Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(textTertiary)
                 .font(.caption)
-                .padding(.leading, 10)
-                .padding(.trailing, 16)
         }
-        .padding(.leading, 14)
-        .padding(.vertical, 14)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .padding(16)
+        .background(cardBg)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(cardStroke, lineWidth: 1)
+        )
         .padding(.horizontal, 16)
     }
 
     // MARK: - Stat tile
 
-    private func statTile(value: Int, label: String, icon: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func statTile(value: Int, label: String, icon: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(color.opacity(0.12))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: icon)
-                        .foregroundStyle(color)
-                        .font(.system(size: 16, weight: .semibold))
-                }
+                Image(systemName: icon)
+                    .foregroundStyle(accent)
+                    .font(.system(size: 18, weight: .semibold))
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(textTertiary)
                     .font(.caption2)
             }
 
-            CountingText(target: value)
+            Text("\(value)")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(textPrimary)
 
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(label.uppercased())
+                .font(.caption2.weight(.semibold))
+                .tracking(0.8)
+                .foregroundStyle(textSecondary)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(cardStroke, lineWidth: 1)
+        )
     }
 
     // MARK: - Last trip card
 
     private func lastTripCard(_ trip: Trip) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(tripFirstColor(trip).opacity(0.12))
+            if let country = trip.country {
+                Text(flag(for: country))
+                    .font(.title)
                     .frame(width: 44, height: 44)
-                if let country = trip.country {
-                    Text(flag(for: country))
-                        .font(.title3)
-                } else {
-                    Image(systemName: "mappin.circle.fill")
-                        .foregroundStyle(tripFirstColor(trip))
-                        .font(.title3)
-                }
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
 
             VStack(alignment: .leading, spacing: 3) {
                 if let location = trip.location {
-                    Text(location).font(.headline)
+                    Text(location)
+                        .font(.headline)
+                        .foregroundStyle(textPrimary)
                 }
                 Text(trip.formattedDateRange)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(textSecondary)
             }
 
             Spacer()
 
-            HStack(spacing: -6) {
+            HStack(spacing: -8) {
                 ForEach(trip.organizers, id: \.self) { initials in
-                    OrganizerAvatar(initials: initials, size: 30)
-                        .overlay(Circle().stroke(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
+                    OrganizerAvatar(initials: initials, size: 28)
+                        .overlay(Circle().stroke(cardBg, lineWidth: 2))
                 }
             }
 
             Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(textTertiary)
                 .font(.caption)
-                .padding(.leading, 6)
         }
         .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(cardStroke, lineWidth: 1)
+        )
         .padding(.horizontal, 16)
     }
 
     // MARK: - Section label
 
     private func sectionLabel(_ title: String) -> some View {
-        Text(title)
-            .font(.title3.bold())
+        Text(title.uppercased())
+            .font(.caption.weight(.semibold))
+            .tracking(1.5)
+            .foregroundStyle(textSecondary)
             .padding(.horizontal, 16)
             .padding(.top, 24)
             .padding(.bottom, 12)
@@ -298,57 +333,10 @@ struct HomeView: View {
 
     // MARK: - Helpers
 
-    private func tripGradient(_ trip: Trip) -> LinearGradient {
-        let colors = trip.organizers.map { OrganizerAvatar.color(for: $0) }
-        let c1 = colors.first ?? .blue
-        let c2 = colors.dropFirst().first ?? c1.opacity(0.7)
-        return LinearGradient(colors: [c1, c2], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-
-    private func tripFirstColor(_ trip: Trip) -> Color {
-        trip.organizers.first.map { OrganizerAvatar.color(for: $0) } ?? .blue
-    }
-
-    private func tripShadowColor(_ trip: Trip) -> Color {
-        (trip.organizers.first.map { OrganizerAvatar.color(for: $0) } ?? .blue).opacity(0.35)
-    }
-
     private func flag(for isoCode: String) -> String {
         isoCode.unicodeScalars
             .compactMap { Unicode.Scalar(127397 + $0.value) }
             .map { String($0) }
             .joined()
-    }
-}
-
-// MARK: - Counting animation
-
-private struct CountingText: View {
-    let target: Int
-    var font: Font = .body
-    @State private var displayed = 0
-    @State private var hasAppeared = false
-
-    var body: some View {
-        Text("\(displayed)")
-            .font(font)
-            .contentTransition(.numericText())
-            .onAppear {
-                guard !hasAppeared else { return }
-                hasAppeared = true
-                animate(from: 0, to: target)
-            }
-            .onChange(of: target) { old, new in
-                animate(from: old, to: new)
-            }
-    }
-
-    private func animate(from old: Int, to value: Int) {
-        guard value != old else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.easeOut(duration: 0.9)) {
-                displayed = value
-            }
-        }
     }
 }
