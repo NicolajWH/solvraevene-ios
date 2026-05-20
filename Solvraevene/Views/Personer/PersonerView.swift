@@ -3,8 +3,12 @@ import SwiftUI
 struct PersonerView: View {
     @Environment(TripStore.self) private var store
 
+    var pastTrips: [Trip] {
+        store.trips.filter { !$0.isFuture }
+    }
+
     var stats: [(name: String, initials: String, count: Int)] {
-        StatsService.organizerCounts(from: store.trips)
+        StatsService.organizerCounts(from: pastTrips)
     }
 
     // Exactly one person gets the badge: fewest trips, tiebreaker = oldest last trip date
@@ -15,7 +19,7 @@ struct PersonerView: View {
         if candidates.count == 1 { return candidates[0].initials }
 
         func lastTripDate(for initials: String) -> String {
-            store.trips
+            pastTrips
                 .filter { $0.organizers.contains(initials) }
                 .map { $0.date }
                 .max() ?? "0000-00-00"

@@ -4,7 +4,7 @@ struct CountriesView: View {
     @Environment(TripStore.self) private var store
 
     var countryCounts: [(country: String, count: Int)] {
-        StatsService.countryCounts(from: store.trips)
+        StatsService.countryCounts(from: store.trips.filter { !$0.isFuture })
     }
 
     var body: some View {

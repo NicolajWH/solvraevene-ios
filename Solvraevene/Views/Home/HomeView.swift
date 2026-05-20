@@ -48,7 +48,7 @@ struct HomeView: View {
             }
 
             Section("Arrangør-statistik") {
-                ForEach(StatsService.organizerCounts(from: store.trips), id: \.initials) { item in
+                ForEach(StatsService.organizerCounts(from: store.trips.filter { !$0.isFuture }), id: \.initials) { item in
                     HStack {
                         Text(item.name)
                         Spacer()
