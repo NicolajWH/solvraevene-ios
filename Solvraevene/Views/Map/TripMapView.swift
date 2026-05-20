@@ -37,13 +37,9 @@ struct TripMapView: View {
         .sheet(item: $selectedTrip) { trip in
             NavigationStack {
                 TripDetailView(trip: trip)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button("Luk") { selectedTrip = nil }
-                        }
-                    }
             }
             .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 }

@@ -14,11 +14,6 @@ struct TripListView: View {
         store.trips.filter { !$0.isFuture }.sorted { $0.date > $1.date }
     }
 
-    var filteredFuture: [Trip] {
-        guard !searchText.isEmpty else { return futureTrips }
-        return futureTrips.filter { matches($0) }
-    }
-
     var futureByYear: [(year: String, trips: [Trip])] {
         let base = searchText.isEmpty ? futureTrips : futureTrips.filter { matches($0) }
         let grouped = Dictionary(grouping: base) { String($0.date.prefix(4)) }
@@ -35,6 +30,24 @@ struct TripListView: View {
         List {
             Section {
                 Toggle("Vis kommende ture", isOn: $showFuture)
+
+                if isSearching {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.secondary)
+                        TextField("Lokation eller arrangør", text: $searchText)
+                            .autocorrectionDisabled()
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
             }
 
             if showFuture {
@@ -59,19 +72,15 @@ struct TripListView: View {
                 }
             }
         }
-        .searchable(
-            text: $searchText,
-            isPresented: $isSearching,
-            prompt: "Søg på lokation eller arrangør"
-        )
         .refreshable { await store.load() }
         .navigationTitle("Ture")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    isSearching = true
+                    withAnimation { isSearching.toggle() }
+                    if !isSearching { searchText = "" }
                 } label: {
-                    Image(systemName: "magnifyingglass")
+                    Image(systemName: isSearching ? "magnifyingglass.circle.fill" : "magnifyingglass")
                 }
             }
         }

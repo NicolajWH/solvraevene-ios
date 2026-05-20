@@ -10,17 +10,31 @@ struct TripDetailView: View {
     var body: some View {
         List {
             Section {
-                VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 0) {
                     if let country = trip.country {
                         Text(flag(for: country))
-                            .font(.system(size: 52))
+                            .font(.system(size: 44))
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.bottom, 12)
                     }
 
-                    Text(trip.formattedDateRange)
-                        .font(.subheadline)
+                    Text("Dato")
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    Text(trip.formattedDateRange)
+                        .font(.body.weight(.medium))
+                        .padding(.top, 2)
+                        .padding(.bottom, 16)
 
                     Divider()
+                        .padding(.bottom, 16)
+
+                    Text("Arrangører")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.bottom, 8)
 
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(trip.organizers, id: \.self) { initials in
@@ -31,9 +45,8 @@ struct TripDetailView: View {
                             }
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 8)
             }
 

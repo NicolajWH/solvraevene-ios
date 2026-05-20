@@ -65,14 +65,13 @@ struct HomeView: View {
                         VStack(spacing: 10) {
                             ForEach(nextTrips) { trip in
                                 NavigationLink(destination: TripDetailView(trip: trip)) {
-                                    upcomingCard(trip, prominent: trip.id == nextTrips.first?.id)
+                                    upcomingCard(trip)
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
                     }
                 }
-                .padding(.top, 4)
 
                 // MARK: Stats
                 HStack(spacing: 12) {
@@ -120,33 +119,18 @@ struct HomeView: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: - Upcoming card (shared style, prominent = first trip)
+    // MARK: - Upcoming card
 
-    private func upcomingCard(_ trip: Trip, prominent: Bool) -> some View {
+    private func upcomingCard(_ trip: Trip) -> some View {
         HStack(spacing: 14) {
-            // Flag or placeholder
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white.opacity(0.06))
-                    .frame(width: prominent ? 52 : 44, height: prominent ? 52 : 44)
-                if let country = trip.country {
-                    Text(flag(for: country))
-                        .font(prominent ? .title : .title2)
-                } else {
-                    Image(systemName: "mappin")
-                        .foregroundStyle(accent)
-                        .font(prominent ? .title3 : .body)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 if let location = trip.location {
                     Text(location)
-                        .font(prominent ? .headline : .subheadline.weight(.semibold))
+                        .font(.headline)
                         .foregroundStyle(textPrimary)
                 }
                 Text(trip.formattedDateRange)
-                    .font(prominent ? .subheadline : .caption)
+                    .font(.subheadline)
                     .foregroundStyle(textSecondary)
             }
 
@@ -154,7 +138,7 @@ struct HomeView: View {
 
             HStack(spacing: -8) {
                 ForEach(trip.organizers, id: \.self) { initials in
-                    OrganizerAvatar(initials: initials, size: prominent ? 32 : 28)
+                    OrganizerAvatar(initials: initials, size: 30)
                         .overlay(Circle().stroke(cardBg, lineWidth: 2))
                 }
             }
@@ -163,12 +147,12 @@ struct HomeView: View {
                 .foregroundStyle(textTertiary)
                 .font(.caption)
         }
-        .padding(prominent ? 18 : 14)
+        .padding(16)
         .background(cardBg)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(prominent ? Color.white.opacity(0.10) : cardStroke, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(cardStroke, lineWidth: 1)
         )
         .padding(.horizontal, 16)
     }
@@ -210,47 +194,7 @@ struct HomeView: View {
     // MARK: - Last trip card
 
     private func lastTripCard(_ trip: Trip) -> some View {
-        HStack(spacing: 14) {
-            if let country = trip.country {
-                Text(flag(for: country))
-                    .font(.title)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
-                if let location = trip.location {
-                    Text(location)
-                        .font(.headline)
-                        .foregroundStyle(textPrimary)
-                }
-                Text(trip.formattedDateRange)
-                    .font(.subheadline)
-                    .foregroundStyle(textSecondary)
-            }
-
-            Spacer()
-
-            HStack(spacing: -8) {
-                ForEach(trip.organizers, id: \.self) { initials in
-                    OrganizerAvatar(initials: initials, size: 28)
-                        .overlay(Circle().stroke(cardBg, lineWidth: 2))
-                }
-            }
-
-            Image(systemName: "chevron.right")
-                .foregroundStyle(textTertiary)
-                .font(.caption)
-        }
-        .padding(16)
-        .background(cardBg)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .strokeBorder(cardStroke, lineWidth: 1)
-        )
-        .padding(.horizontal, 16)
+        upcomingCard(trip)
     }
 
     // MARK: - Section label
