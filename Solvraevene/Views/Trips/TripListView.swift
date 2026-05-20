@@ -4,6 +4,7 @@ struct TripListView: View {
     @Environment(TripStore.self) private var store
     @State private var showFuture = false
     @State private var searchText = ""
+    @State private var isSearching = false
 
     var futureTrips: [Trip] {
         store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
@@ -58,9 +59,22 @@ struct TripListView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Søg på lokation eller arrangør")
+        .searchable(
+            text: $searchText,
+            isPresented: $isSearching,
+            prompt: "Søg på lokation eller arrangør"
+        )
         .refreshable { await store.load() }
         .navigationTitle("Ture")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isSearching = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+            }
+        }
     }
 
     private func matches(_ trip: Trip) -> Bool {

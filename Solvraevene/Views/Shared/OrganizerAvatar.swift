@@ -7,10 +7,10 @@ struct OrganizerAvatar: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(Self.color(for: initials).gradient)
+                .fill(Color(uiColor: .label))
             Text(initials)
-                .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: size * 0.36, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color(uiColor: .systemBackground))
         }
         .frame(width: size, height: size)
     }

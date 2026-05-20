@@ -38,7 +38,7 @@ struct PersonerView: View {
 
     var body: some View {
         List {
-            Section("Brødre") {
+            Section {
                 ForEach(sortedStats, id: \.initials) { item in
                     NavigationLink(destination: PersonTripsView(
                         initials: item.initials,
