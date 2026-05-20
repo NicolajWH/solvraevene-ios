@@ -50,68 +50,45 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 16)
                 } else {
-                    if let first = nextTrips.first {
-                        NavigationLink(destination: TripDetailView(trip: first)) {
-                            heroCard(first)
+                    ForEach(nextTrips) { trip in
+                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                            upcomingCard(trip)
                         }
                         .buttonStyle(.plain)
                         .padding(.bottom, 8)
-                    }
-                    if nextTrips.count > 1 {
-                        NavigationLink(destination: TripDetailView(trip: nextTrips[1])) {
-                            compactCard(nextTrips[1])
-                        }
-                        .buttonStyle(.plain)
                     }
                 }
 
                 // Stats tiles
                 HStack(spacing: 12) {
-                    statTile(
-                        value: pastTrips.count,
-                        label: "Ture gennemført",
-                        icon: "figure.walk.departure",
-                        color: .blue
-                    )
-                    statTile(
-                        value: countryCount,
-                        label: "Lande besøgt",
-                        icon: "globe.europe.africa.fill",
-                        color: .green
-                    )
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 24)
-
-                // Quick navigation
-                HStack(spacing: 12) {
-                    quickLink(label: "Alle ture", icon: "calendar", tab: 1)
-                    quickLink(label: "Lande", icon: "flag.fill", tab: 3)
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-
-                NavigationLink(destination: StatsView()) {
-                    HStack {
-                        Label("Se statistik", systemImage: "chart.bar.fill")
-                            .font(.subheadline.weight(.medium))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.tertiary)
-                            .font(.caption)
+                    Button { selectedTab = 1 } label: {
+                        statTile(
+                            value: pastTrips.count,
+                            label: "Ture gennemført",
+                            icon: "figure.walk.departure",
+                            color: .blue
+                        )
                     }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .buttonStyle(.plain)
+
+                    Button { selectedTab = 3 } label: {
+                        statTile(
+                            value: countryCount,
+                            label: "Lande besøgt",
+                            icon: "globe.europe.africa.fill",
+                            color: .green
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 .padding(.horizontal, 16)
-                .padding(.top, 12)
+                .padding(.top, 28)
+                .padding(.bottom, 4)
 
                 if let trip = lastTrip {
                     sectionHeader("Seneste tur")
                     NavigationLink(destination: TripDetailView(trip: trip)) {
-                        compactCard(trip)
+                        upcomingCard(trip)
                     }
                     .buttonStyle(.plain)
                 }
@@ -123,46 +100,9 @@ struct HomeView: View {
         .navigationTitle("Sølvrævene")
     }
 
-    // MARK: - Hero card
+    // MARK: - Upcoming card (consistent style for all trip cards on home)
 
-    private func heroCard(_ trip: Trip) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(tripGradient(trip))
-                .frame(minHeight: 200)
-                .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
-
-            VStack(alignment: .leading, spacing: 8) {
-                Spacer()
-                if let location = trip.location {
-                    Text(location)
-                        .font(.title.bold())
-                        .foregroundStyle(.white)
-                }
-                Text(trip.formattedDateRange)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.85))
-
-                HStack(spacing: 6) {
-                    ForEach(trip.organizers, id: \.self) { initials in
-                        OrganizerAvatar(initials: initials, size: 32)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 32 * 0.28)
-                                    .stroke(.white.opacity(0.5), lineWidth: 1.5)
-                            )
-                    }
-                }
-                .padding(.top, 2)
-            }
-            .padding(24)
-            .frame(maxWidth: .infinity, minHeight: 200, alignment: .bottomLeading)
-        }
-        .padding(.horizontal, 16)
-    }
-
-    // MARK: - Compact card
-
-    private func compactCard(_ trip: Trip) -> some View {
+    private func upcomingCard(_ trip: Trip) -> some View {
         HStack(alignment: .center, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
                 if let location = trip.location {
@@ -209,33 +149,7 @@ struct HomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
-    // MARK: - Quick navigation
-
-    private func quickLink(label: String, icon: String, tab: Int) -> some View {
-        Button { selectedTab = tab } label: {
-            HStack {
-                Label(label, systemImage: icon)
-                    .font(.subheadline.weight(.medium))
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.tertiary)
-                    .font(.caption)
-            }
-            .padding()
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
-    }
-
     // MARK: - Helpers
-
-    private func tripGradient(_ trip: Trip) -> LinearGradient {
-        let colors = trip.organizers.map { OrganizerAvatar.color(for: $0) }
-        let c1 = colors.first ?? .blue
-        let c2 = colors.dropFirst().first ?? c1.opacity(0.6)
-        return LinearGradient(colors: [c1, c2], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
 
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
@@ -252,18 +166,24 @@ private struct CountingText: View {
     let target: Int
     var font: Font = .body
     @State private var displayed = 0
+    @State private var hasAppeared = false
 
     var body: some View {
         Text("\(displayed)")
             .font(font)
             .contentTransition(.numericText())
-            .onAppear { animate(to: target) }
-            .onChange(of: target) { _, new in animate(to: new) }
+            .onAppear {
+                guard !hasAppeared else { return }
+                hasAppeared = true
+                animate(from: 0, to: target)
+            }
+            .onChange(of: target) { old, new in
+                animate(from: old, to: new)
+            }
     }
 
-    private func animate(to value: Int) {
-        displayed = 0
-        guard value > 0 else { return }
+    private func animate(from old: Int, to value: Int) {
+        guard value != old else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             withAnimation(.easeOut(duration: 0.9)) {
                 displayed = value

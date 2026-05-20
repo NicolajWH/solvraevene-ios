@@ -24,10 +24,6 @@ struct CountriesView: View {
         Set(countryCounts.map { $0.country })
     }
 
-    var unvisitedEuropean: [String] {
-        Self.europeanCountries.filter { !visitedCodes.contains($0) }
-    }
-
     var body: some View {
         List {
             if countryCounts.isEmpty {
@@ -56,52 +52,37 @@ struct CountriesView: View {
             }
 
             Section("Norden") {
-                LazyVGrid(
-                    columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),
-                    spacing: 10
-                ) {
-                    ForEach(Self.nordicCountries, id: \.self) { code in
-                        VStack(spacing: 4) {
-                            Text(flag(for: code))
-                                .font(.title2)
-                                .grayscale(visitedCodes.contains(code) ? 0 : 1)
-                                .opacity(visitedCodes.contains(code) ? 1.0 : 0.35)
-                            Text(countryName(for: code))
-                                .font(.system(size: 9))
-                                .foregroundStyle(visitedCodes.contains(code) ? .primary : .tertiary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                        }
-                    }
-                }
-                .padding(.vertical, 8)
+                countryGrid(Self.nordicCountries)
             }
 
-            if !unvisitedEuropean.isEmpty {
-                Section("Lande vi mangler at besøge i Europa") {
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),
-                        spacing: 12
-                    ) {
-                        ForEach(unvisitedEuropean, id: \.self) { code in
-                            VStack(spacing: 3) {
-                                Text(flag(for: code))
-                                    .font(.title2)
-                                    .grayscale(1)
-                                    .opacity(0.4)
-                                Text(countryName(for: code))
-                                    .font(.system(size: 8))
-                                    .foregroundStyle(.tertiary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.6)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
+            Section("Europa") {
+                countryGrid(Self.europeanCountries)
             }
         }
         .navigationTitle("Lande")
+    }
+
+    private func countryGrid(_ codes: [String]) -> some View {
+        LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),
+            spacing: 12
+        ) {
+            ForEach(codes, id: \.self) { code in
+                let visited = visitedCodes.contains(code)
+                VStack(spacing: 4) {
+                    Text(flag(for: code))
+                        .font(.title2)
+                        .grayscale(visited ? 0 : 1)
+                        .opacity(visited ? 1.0 : 0.35)
+                    Text(countryName(for: code))
+                        .font(.system(size: 9))
+                        .foregroundStyle(visited ? .primary : .tertiary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+            }
+        }
+        .padding(.vertical, 8)
     }
 
     private func flag(for isoCode: String) -> String {

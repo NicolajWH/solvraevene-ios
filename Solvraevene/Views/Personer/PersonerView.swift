@@ -23,21 +23,29 @@ struct PersonerView: View {
         Set(upcomingTrips.dropFirst().first?.organizers ?? [])
     }
 
+    var sortedStats: [(name: String, initials: String, count: Int)] {
+        stats.sorted { a, b in
+            let aIsNext = nextOrganizers.contains(a.initials)
+            let bIsNext = nextOrganizers.contains(b.initials)
+            let aIsSecond = secondOrganizers.contains(a.initials)
+            let bIsSecond = secondOrganizers.contains(b.initials)
+
+            if aIsNext != bIsNext { return aIsNext }
+            if aIsSecond != bIsSecond { return aIsSecond }
+            return a.count > b.count
+        }
+    }
+
     var body: some View {
         List {
             Section("Brødre") {
-                ForEach(Array(stats.enumerated()), id: \.element.initials) { index, item in
+                ForEach(sortedStats, id: \.initials) { item in
                     NavigationLink(destination: PersonTripsView(
                         initials: item.initials,
                         name: item.name,
                         trips: pastTrips.filter { $0.organizers.contains(item.initials) }
                     )) {
                         HStack(spacing: 12) {
-                            Text("\(index + 1)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .frame(width: 20)
-
                             OrganizerAvatar(initials: item.initials, size: 40)
 
                             VStack(alignment: .leading, spacing: 3) {
@@ -45,15 +53,10 @@ struct PersonerView: View {
                                     .font(.subheadline.weight(.semibold))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.8)
-                                HStack(spacing: 6) {
-                                    Text(item.initials)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    if nextOrganizers.contains(item.initials) {
-                                        badge("Formand", color: .blue)
-                                    } else if secondOrganizers.contains(item.initials) {
-                                        badge("Kommende formand", color: .teal)
-                                    }
+                                if nextOrganizers.contains(item.initials) {
+                                    badge("Formand", color: .blue)
+                                } else if secondOrganizers.contains(item.initials) {
+                                    badge("Kommende formand", color: .teal)
                                 }
                             }
 

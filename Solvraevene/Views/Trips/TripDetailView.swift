@@ -26,17 +26,11 @@ struct TripDetailView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
-                    HStack(spacing: 12) {
+                    VStack(spacing: 4) {
                         ForEach(trip.organizers, id: \.self) { initials in
-                            VStack(spacing: 4) {
-                                OrganizerAvatar(initials: initials, size: 44)
-                                Text(firstName(for: initials))
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.7)
-                                    .frame(maxWidth: 60)
-                            }
+                            Text(Organizer.fullName(for: initials))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .padding(.top, 4)
@@ -70,10 +64,6 @@ struct TripDetailView: View {
         } message: {
             Text(calendarMessage ?? "")
         }
-    }
-
-    private func firstName(for initials: String) -> String {
-        Organizer.fullName(for: initials).components(separatedBy: " ").first ?? initials
     }
 
     private func flag(for isoCode: String) -> String {

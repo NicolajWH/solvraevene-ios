@@ -6,9 +6,8 @@ struct OrganizerAvatar: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: size * 0.28)
+            Circle()
                 .fill(Self.color(for: initials).gradient)
-                .shadow(color: Self.color(for: initials).opacity(0.35), radius: size * 0.18, x: 0, y: size * 0.06)
             Text(initials)
                 .font(.system(size: size * 0.38, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)

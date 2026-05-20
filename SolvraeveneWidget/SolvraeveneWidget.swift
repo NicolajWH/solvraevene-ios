@@ -152,16 +152,17 @@ struct WidgetEntryView: View {
     }
 
     private func avatarColor(for initials: String) -> Color {
-        let palette: [Color] = [
-            Color(red: 0.40, green: 0.44, blue: 0.78),
-            Color(red: 0.22, green: 0.60, blue: 0.42),
-            Color(red: 0.82, green: 0.44, blue: 0.18),
-            Color(red: 0.58, green: 0.24, blue: 0.70),
-            Color(red: 0.18, green: 0.58, blue: 0.74),
-            Color(red: 0.78, green: 0.24, blue: 0.34),
-        ]
-        let hash = initials.unicodeScalars.reduce(0) { $0 + Int($1.value) }
-        return palette[hash % palette.count]
+        switch initials {
+        case "DM":  return Color(red: 0.12, green: 0.53, blue: 0.72)
+        case "NWH": return Color(red: 0.33, green: 0.31, blue: 0.76)
+        case "MC":  return Color(red: 0.15, green: 0.58, blue: 0.28)
+        case "MSA": return Color(red: 0.86, green: 0.45, blue: 0.14)
+        case "PHA": return Color(red: 0.80, green: 0.20, blue: 0.24)
+        case "MR":  return Color(red: 0.55, green: 0.18, blue: 0.76)
+        default:
+            let hue = Double(initials.unicodeScalars.reduce(0) { ($0 + Int($1.value)) % 360 }) / 360.0
+            return Color(hue: hue, saturation: 0.65, brightness: 0.75)
+        }
     }
 }
 
