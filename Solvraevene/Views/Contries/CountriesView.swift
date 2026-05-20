@@ -41,13 +41,8 @@ struct CountriesView: View {
                             HStack(spacing: 12) {
                                 Text(flag(for: item.country))
                                     .font(.title2)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(countryName(for: item.country))
+                                Text(countryName(for: item.country))
                                         .font(.headline)
-                                    Text(item.country)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
                                 Spacer()
                                 Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
                                     .foregroundStyle(.secondary)

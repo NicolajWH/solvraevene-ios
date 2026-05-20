@@ -14,10 +14,6 @@ struct TripDetailView: View {
                     if let country = trip.country {
                         Text(flag(for: country))
                             .font(.system(size: 52))
-                    } else {
-                        Image(systemName: "airplane")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.secondary)
                     }
 
                     if let location = trip.location {

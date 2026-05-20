@@ -11,18 +11,21 @@ struct PersonerView: View {
         StatsService.organizerCounts(from: pastTrips)
     }
 
-    var nextTripOrganizers: Set<String> {
-        guard let nextTrip = store.trips
-            .filter({ $0.isFuture })
-            .sorted(by: { $0.date < $1.date })
-            .first
-        else { return [] }
-        return Set(nextTrip.organizers)
+    var upcomingTrips: [Trip] {
+        store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
+    }
+
+    var nextOrganizers: Set<String> {
+        Set(upcomingTrips.first?.organizers ?? [])
+    }
+
+    var secondOrganizers: Set<String> {
+        Set(upcomingTrips.dropFirst().first?.organizers ?? [])
     }
 
     var body: some View {
         List {
-            Section {
+            Section("Arrangører") {
                 ForEach(Array(stats.enumerated()), id: \.element.initials) { index, item in
                     NavigationLink(destination: PersonTripsView(
                         initials: item.initials,
@@ -38,17 +41,13 @@ struct PersonerView: View {
                             OrganizerAvatar(initials: item.initials)
 
                             VStack(alignment: .leading, spacing: 2) {
-                                HStack {
+                                HStack(spacing: 6) {
                                     Text(item.name)
                                         .font(.headline)
-                                    if nextTripOrganizers.contains(item.initials) {
-                                        Text("Næste tur")
-                                            .font(.caption)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 2)
-                                            .background(Color.blue.opacity(0.15))
-                                            .foregroundStyle(.blue)
-                                            .clipShape(Capsule())
+                                    if nextOrganizers.contains(item.initials) {
+                                        badge("Formand", color: .blue)
+                                    } else if secondOrganizers.contains(item.initials) {
+                                        badge("Kommende formand", color: .teal)
                                     }
                                 }
                                 Text(item.initials)
@@ -64,10 +63,18 @@ struct PersonerView: View {
                         .padding(.vertical, 4)
                     }
                 }
-            } header: {
-                Text("Arrangører")
             }
         }
         .navigationTitle("Personer")
+    }
+
+    private func badge(_ label: String, color: Color) -> some View {
+        Text(label)
+            .font(.caption)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.15))
+            .foregroundStyle(color)
+            .clipShape(Capsule())
     }
 }
