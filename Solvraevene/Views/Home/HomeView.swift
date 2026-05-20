@@ -3,8 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(TripStore.self) private var store
 
-    var futureTrips: [Trip] {
-        store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }
+    var nextTrips: [Trip] {
+        Array(store.trips.filter { $0.isFuture }.sorted { $0.date < $1.date }.prefix(2))
     }
 
     var body: some View {
@@ -27,13 +27,13 @@ struct HomeView: View {
             }
 
             Section("Kommende ture") {
-                if futureTrips.isEmpty {
+                if nextTrips.isEmpty {
                     Text("Ingen kommende ture")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(futureTrips) { trip in
+                    ForEach(nextTrips) { trip in
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(trip.formattedDate)
+                            Text(trip.formattedDateRange)
                                 .font(.headline)
                             Text(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))
                                 .font(.subheadline)

@@ -6,7 +6,7 @@ struct TripDetailView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Dato", value: trip.formattedDate)
+                LabeledContent("Dato", value: trip.formattedDateRange)
                 if let location = trip.location {
                     LabeledContent("Lokation", value: location)
                 }
