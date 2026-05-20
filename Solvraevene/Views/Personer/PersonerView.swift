@@ -101,6 +101,18 @@ struct PersonerView: View {
                 .frame(height: CGFloat(sortedStats.count) * 28 + 16)
                 .padding(.vertical, 8)
             }
+
+            Section {
+                PairMatrixView(
+                    people: sortedStats.map { $0.initials },
+                    pairs: StatsService.pairCounts(from: pastTrips)
+                )
+                .padding(.vertical, 8)
+            } header: {
+                Text("Hvor mange gange har de arrangeret sammen?")
+            } footer: {
+                Text("Tallet er antal fælles ture. Mørk celle = mange ture sammen.")
+            }
         }
         .navigationTitle("Brødre")
     }

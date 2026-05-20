@@ -30,4 +30,22 @@ class StatsService {
                 return $0.count > $1.count
             }
     }
+
+    /// Number of trips each pair of organizers has done together.
+    /// Key is a sorted tuple (a < b). Diagonal pairs (a == b) are excluded.
+    static func pairCounts(from trips: [Trip]) -> [String: [String: Int]] {
+        var matrix: [String: [String: Int]] = [:]
+        for trip in trips {
+            let orgs = trip.organizers
+            guard orgs.count >= 2 else { continue }
+            for i in 0..<orgs.count {
+                for j in (i + 1)..<orgs.count {
+                    let a = orgs[i], b = orgs[j]
+                    matrix[a, default: [:]][b, default: 0] += 1
+                    matrix[b, default: [:]][a, default: 0] += 1
+                }
+            }
+        }
+        return matrix
+    }
 }
