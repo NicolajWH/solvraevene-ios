@@ -97,6 +97,7 @@ targets:
 
     sources:
       - SolvraeveneWatchApp
+      - path: Solvraevene/Assets.xcassets
 
     info:
       path: SolvraeveneWatchApp/Info.plist
@@ -104,7 +105,9 @@ targets:
         CFBundleDisplayName: "Sølvrævene"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleIconName: AppIcon
         WKApplication: true
+        WKCompanionAppBundleIdentifier: dk.haugaard.solvraevene
 
     settings:
       PRODUCT_NAME: SolvraeveneWatchApp
@@ -116,6 +119,7 @@ targets:
       CODE_SIGN_STYLE: Manual
       CODE_SIGN_IDENTITY: "Apple Distribution"
       PROVISIONING_PROFILE_SPECIFIER: "match AppStore dk.haugaard.solvraevene.watchkitapp"
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
     dependencies:
       - target: SolvraeveneWatchWidget
