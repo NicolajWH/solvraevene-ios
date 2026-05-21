@@ -4,6 +4,7 @@ import SwiftUI
 struct WatchTripSnapshot {
     let dateRange: String
     let location: String?
+    let organizers: [String]
     let countdown: String?
     let daysUntil: Int?
 }
@@ -18,6 +19,7 @@ struct WatchTripProvider: TimelineProvider {
         WatchNextTripEntry(date: Date(), nextTrip: WatchTripSnapshot(
             dateRange: "23.-25. okt 2026",
             location: "Madrid",
+            organizers: ["MR", "NWH"],
             countdown: "Om 156 dage",
             daysUntil: 156
         ))
@@ -81,6 +83,7 @@ struct WatchTripProvider: TimelineProvider {
         return WatchNextTripEntry(date: now, nextTrip: WatchTripSnapshot(
             dateRange: formatRange(date: t.date, endDate: t.endDate),
             location: t.location,
+            organizers: t.organizers,
             countdown: countdown,
             daysUntil: days
         ))
@@ -155,7 +158,7 @@ struct WatchWidgetEntryView: View {
         .containerBackground(Color.clear, for: .widget)
     }
 
-    // MARK: - Rectangular — sted + nedtælling
+    // MARK: - Rectangular — destination er hemmelighed, viser dato + arrangører
 
     @ViewBuilder
     private var rectangularView: some View {
@@ -165,19 +168,21 @@ struct WatchWidgetEntryView: View {
                     .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                if let location = trip.location {
-                    Text(location)
-                        .font(.system(size: 14, weight: .bold))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
                 if let countdown = trip.countdown {
                     Text(countdown)
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .lineLimit(1)
-                } else {
+                }
+                HStack(spacing: 4) {
                     Text(trip.dateRange)
-                        .font(.system(size: 11))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Spacer(minLength: 0)
+                    Text(trip.organizers.joined(separator: " & "))
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
