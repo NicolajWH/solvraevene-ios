@@ -113,6 +113,9 @@ struct WatchCountdownView: View {
 
     var body: some View {
         VStack(spacing: 6) {
+            Text("🦊")
+                .font(.system(size: 20))
+                .grayscale(1)
             switch trip.daysUntil {
             case 0:
                 Text("I dag!")

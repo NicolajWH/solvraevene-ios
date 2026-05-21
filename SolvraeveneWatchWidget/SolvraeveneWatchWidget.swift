@@ -150,9 +150,9 @@ struct WatchWidgetEntryView: View {
                     }
                 }
             } else {
-                Image(systemName: "figure.walk.departure")
+                Text("🦊")
                     .font(.title3)
-                    .foregroundStyle(.secondary)
+                    .grayscale(1)
             }
         }
         .containerBackground(Color.clear, for: .widget)
@@ -164,10 +164,13 @@ struct WatchWidgetEntryView: View {
     private var rectangularView: some View {
         if let trip = entry.nextTrip {
             VStack(alignment: .leading, spacing: 2) {
-                Label("Næste tur", systemImage: "figure.walk.departure")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text("🦊").font(.system(size: 9)).grayscale(1)
+                    Text("Næste tur")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .lineLimit(1)
                 if let countdown = trip.countdown {
                     Text(countdown)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -189,9 +192,11 @@ struct WatchWidgetEntryView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .containerBackground(Color.clear, for: .widget)
         } else {
-            Label("Ingen ture planlagt", systemImage: "figure.walk.departure")
-                .font(.caption)
-                .containerBackground(Color.clear, for: .widget)
+            HStack(spacing: 4) {
+                Text("🦊").grayscale(1)
+                Text("Ingen ture planlagt").font(.caption)
+            }
+            .containerBackground(Color.clear, for: .widget)
         }
     }
 
@@ -201,8 +206,9 @@ struct WatchWidgetEntryView: View {
     private var cornerView: some View {
         ZStack {
             AccessoryWidgetBackground()
-            Image(systemName: "figure.walk.departure")
-                .font(.system(size: 16, weight: .semibold))
+            Text("🦊")
+                .font(.system(size: 16))
+                .grayscale(1)
                 .widgetAccentable()
         }
         .widgetLabel {
