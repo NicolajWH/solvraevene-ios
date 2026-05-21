@@ -15,7 +15,7 @@ struct PackingItem: Identifiable {
 actor PackingListService {
     static let shared = PackingListService()
 
-    private let db = CKContainer(identifier: "iCloud.dk.haugaard.solvraevene").publicCloudDatabase
+    private let db = CKContainer.default().publicCloudDatabase
 
     // MARK: - Items
 

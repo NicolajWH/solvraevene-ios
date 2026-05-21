@@ -34,7 +34,7 @@ struct TripAnnouncement {
 actor TripAnnouncementService {
     static let shared = TripAnnouncementService()
 
-    private let db = CKContainer(identifier: "iCloud.dk.haugaard.solvraevene").publicCloudDatabase
+    private let db = CKContainer.default().publicCloudDatabase
 
     func fetch(for tripDate: String) async throws -> TripAnnouncement? {
         let pred = NSPredicate(format: "tripDate == %@", tripDate)
