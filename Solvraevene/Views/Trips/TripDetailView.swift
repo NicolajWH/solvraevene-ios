@@ -58,6 +58,13 @@ struct TripDetailView: View {
                 }
             }
 
+            if trip.isFuture {
+                TripAnnouncementSection(
+                    tripDate: trip.date,
+                    tripTitle: trip.location ?? "Tur"
+                )
+            }
+
             Section {
                 NavigationLink(destination: PackingListView(
                     tripDate: trip.date,
