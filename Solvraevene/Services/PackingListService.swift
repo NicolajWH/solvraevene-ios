@@ -3,12 +3,12 @@ import CloudKit
 struct PackingItem: Identifiable {
     let id: CKRecord.ID
     var text: String
-    var order: Int
+    var sortOrder: Int
 
     init(record: CKRecord) {
         self.id = record.recordID
         self.text = record["text"] as? String ?? ""
-        self.order = record["order"] as? Int ?? 0
+        self.sortOrder = (record["sortOrder"] as? NSNumber)?.intValue ?? 0
     }
 }
 
@@ -22,24 +22,20 @@ actor PackingListService {
     func fetchItems(for tripDate: String) async throws -> [PackingItem] {
         let pred = NSPredicate(format: "tripDate == %@", tripDate)
         let query = CKQuery(recordType: "PackingItem", predicate: pred)
-        query.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
         let result = try await db.records(matching: query)
-        return result.matchResults.compactMap { try? $0.1.get() }.map { PackingItem(record: $0) }
+        return result.matchResults
+            .compactMap { try? $0.1.get() }
+            .map { PackingItem(record: $0) }
+            .sorted { $0.sortOrder < $1.sortOrder }
     }
 
     func addItem(tripDate: String, text: String, order: Int) async throws -> PackingItem {
         let record = CKRecord(recordType: "PackingItem")
-        record["tripDate"] = tripDate
-        record["text"] = text
-        record["order"] = order
+        record["tripDate"] = tripDate as CKRecordValue
+        record["text"] = text as CKRecordValue
+        record["sortOrder"] = NSNumber(value: order)
         let saved = try await db.save(record)
         return PackingItem(record: saved)
-    }
-
-    func updateItem(_ item: PackingItem, text: String) async throws {
-        let record = try await db.record(for: item.id)
-        record["text"] = text
-        _ = try await db.save(record)
     }
 
     func deleteItem(_ item: PackingItem) async throws {
@@ -59,7 +55,6 @@ actor PackingListService {
             subscriptionID: "packing-\(tripDate)",
             options: [.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate]
         )
-
         let info = CKSubscription.NotificationInfo()
         info.title = "Huskeliste opdateret"
         info.alertBody = "Huskelisten til \(tripTitle) er blevet ændret"
@@ -70,11 +65,9 @@ actor PackingListService {
         do {
             _ = try await db.save(sub)
             UserDefaults.standard.set(true, forKey: subKey)
-        } catch let error as CKError where error.code == .serverRejectedRequest {
-            // Subscription already exists on server — mark locally so we don't retry
-            UserDefaults.standard.set(true, forKey: subKey)
         } catch {
-            // Silent fail — notifications are nice-to-have, not critical
+            // Mark as done to avoid hammering the server on repeated opens
+            UserDefaults.standard.set(true, forKey: subKey)
         }
     }
 }
