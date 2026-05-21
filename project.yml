@@ -26,6 +26,7 @@ targets:
         embed: true
       - target: SolvraeveneWatchApp
         embed: true
+        link: false
 
     settings:
       PRODUCT_NAME: Solvraevene
