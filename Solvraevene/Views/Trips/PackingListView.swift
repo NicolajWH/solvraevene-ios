@@ -96,6 +96,7 @@ struct PackingListView: View {
             self.error = "Kunne ikke hente huskelisten. Tjek din internetforbindelse."
         }
         isLoading = false
+        await PackingListService.shared.subscribeIfNeeded(for: tripDate, tripTitle: tripTitle)
     }
 
     private func addItem() {

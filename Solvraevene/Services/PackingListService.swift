@@ -17,6 +17,8 @@ actor PackingListService {
 
     private let db = CKContainer(identifier: "iCloud.dk.haugaard.solvraevene").publicCloudDatabase
 
+    // MARK: - Items
+
     func fetchItems(for tripDate: String) async throws -> [PackingItem] {
         let pred = NSPredicate(format: "tripDate == %@", tripDate)
         let query = CKQuery(recordType: "PackingItem", predicate: pred)
@@ -42,5 +44,37 @@ actor PackingListService {
 
     func deleteItem(_ item: PackingItem) async throws {
         try await db.deleteRecord(withID: item.id)
+    }
+
+    // MARK: - Subscriptions
+
+    func subscribeIfNeeded(for tripDate: String, tripTitle: String) async {
+        let subKey = "ck_subscribed_\(tripDate)"
+        guard !UserDefaults.standard.bool(forKey: subKey) else { return }
+
+        let pred = NSPredicate(format: "tripDate == %@", tripDate)
+        let sub = CKQuerySubscription(
+            recordType: "PackingItem",
+            predicate: pred,
+            subscriptionID: "packing-\(tripDate)",
+            options: [.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate]
+        )
+
+        let info = CKSubscription.NotificationInfo()
+        info.title = "Huskeliste opdateret"
+        info.alertBody = "Huskelisten til \(tripTitle) er blevet ændret"
+        info.soundName = "default"
+        info.shouldBadge = false
+        sub.notificationInfo = info
+
+        do {
+            _ = try await db.save(sub)
+            UserDefaults.standard.set(true, forKey: subKey)
+        } catch let error as CKError where error.code == .serverRejectedRequest {
+            // Subscription already exists on server — mark locally so we don't retry
+            UserDefaults.standard.set(true, forKey: subKey)
+        } catch {
+            // Silent fail — notifications are nice-to-have, not critical
+        }
     }
 }
