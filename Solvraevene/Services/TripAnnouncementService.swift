@@ -3,30 +3,30 @@ import CloudKit
 struct TripAnnouncement {
     var message: String
     var meetingPlace: String
-    var departureTime: String
-    var returnTime: String
+    var departureDateTime: Date?
+    var returnDateTime: Date?
     var recordID: CKRecord.ID?
 
-    static let empty = TripAnnouncement(message: "", meetingPlace: "", departureTime: "", returnTime: "", recordID: nil)
+    static let empty = TripAnnouncement(message: "", meetingPlace: "", departureDateTime: nil, returnDateTime: nil, recordID: nil)
 
-    init(message: String, meetingPlace: String, departureTime: String, returnTime: String, recordID: CKRecord.ID?) {
+    var isEmpty: Bool {
+        message.isEmpty && meetingPlace.isEmpty && departureDateTime == nil && returnDateTime == nil
+    }
+
+    init(message: String, meetingPlace: String, departureDateTime: Date?, returnDateTime: Date?, recordID: CKRecord.ID?) {
         self.message = message
         self.meetingPlace = meetingPlace
-        self.departureTime = departureTime
-        self.returnTime = returnTime
+        self.departureDateTime = departureDateTime
+        self.returnDateTime = returnDateTime
         self.recordID = recordID
     }
 
     init(record: CKRecord) {
         self.message = record["message"] as? String ?? ""
         self.meetingPlace = record["meetingPlace"] as? String ?? ""
-        self.departureTime = record["departureTime"] as? String ?? ""
-        self.returnTime = record["returnTime"] as? String ?? ""
+        self.departureDateTime = record["departureDateTime"] as? Date
+        self.returnDateTime = record["returnDateTime"] as? Date
         self.recordID = record.recordID
-    }
-
-    var isEmpty: Bool {
-        message.isEmpty && meetingPlace.isEmpty && departureTime.isEmpty && returnTime.isEmpty
     }
 }
 
@@ -53,8 +53,8 @@ actor TripAnnouncementService {
         }
         record["message"] = announcement.message
         record["meetingPlace"] = announcement.meetingPlace
-        record["departureTime"] = announcement.departureTime
-        record["returnTime"] = announcement.returnTime
+        record["departureDateTime"] = announcement.departureDateTime
+        record["returnDateTime"] = announcement.returnDateTime
         let saved = try await db.save(record)
         return TripAnnouncement(record: saved)
     }

@@ -61,6 +61,7 @@ struct TripDetailView: View {
             if trip.isFuture {
                 TripAnnouncementSection(
                     tripDate: trip.date,
+                    tripEndDate: trip.endDate,
                     tripTitle: trip.location ?? "Tur"
                 )
             }
