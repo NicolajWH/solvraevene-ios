@@ -48,4 +48,38 @@ class StatsService {
         }
         return matrix
     }
+
+    static func monthCounts(from trips: [Trip]) -> [(month: Int, label: String, count: Int)] {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        let monthName = DateFormatter()
+        monthName.dateFormat = "MMM"
+        monthName.locale = Locale(identifier: "da_DK")
+
+        var counts: [Int: Int] = [:]
+        for trip in trips {
+            guard let d = f.date(from: trip.date) else { continue }
+            let m = Calendar.current.component(.month, from: d)
+            counts[m, default: 0] += 1
+        }
+        return counts
+            .map { month, count -> (month: Int, label: String, count: Int) in
+                let d = Calendar.current.date(from: DateComponents(month: month))!
+                return (month: month, label: monthName.string(from: d).capitalized, count: count)
+            }
+            .sorted { $0.month < $1.month }
+    }
+
+    static func seasonCounts(from trips: [Trip]) -> (spring: Int, autumn: Int) {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        var spring = 0, autumn = 0
+        for trip in trips {
+            guard let d = f.date(from: trip.date) else { continue }
+            let m = Calendar.current.component(.month, from: d)
+            if m >= 3 && m <= 6 { spring += 1 }
+            else if m >= 8 && m <= 11 { autumn += 1 }
+        }
+        return (spring, autumn)
+    }
 }

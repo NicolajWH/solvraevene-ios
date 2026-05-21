@@ -13,6 +13,14 @@ struct PersonerView: View {
         StatsService.pairCounts(from: pastTrips)
     }
 
+    private var monthCounts: [(month: Int, label: String, count: Int)] {
+        StatsService.monthCounts(from: pastTrips)
+    }
+
+    private var seasonCounts: (spring: Int, autumn: Int) {
+        StatsService.seasonCounts(from: pastTrips)
+    }
+
     /// Pair with the highest joint count.
     private var topPair: (a: String, b: String, count: Int)? {
         let people = sortedStats.map { $0.initials }
@@ -154,6 +162,32 @@ struct PersonerView: View {
             } footer: {
                 Text("Orange ramme = par der mangler en runde. Tryk på en celle for at se de fælles ture.")
             }
+
+            Section("Sæson") {
+                HStack(spacing: 0) {
+                    seasonPill(label: "Forår", count: seasonCounts.spring, color: .green)
+                    Spacer()
+                    seasonPill(label: "Efterår", count: seasonCounts.autumn, color: .orange)
+                }
+                .padding(.vertical, 4)
+
+                Chart(monthCounts, id: \.month) { item in
+                    BarMark(
+                        x: .value("Måned", item.label),
+                        y: .value("Antal", item.count)
+                    )
+                    .foregroundStyle(item.month <= 6 ? Color.green.gradient : Color.orange.gradient)
+                    .cornerRadius(4)
+                    .annotation(position: .top, alignment: .center) {
+                        Text("\(item.count)")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .chartYAxis(.hidden)
+                .frame(height: 120)
+                .padding(.vertical, 8)
+            }
         }
         .navigationTitle("Brødre")
         .navigationDestination(item: $selectedPair) { pair in
@@ -165,6 +199,21 @@ struct PersonerView: View {
                 }
             )
         }
+    }
+
+    private func seasonPill(label: String, count: Int, color: Color) -> some View {
+        VStack(spacing: 4) {
+            Text("\(count)")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+            Text(label.uppercased())
+                .font(.caption2.weight(.semibold))
+                .tracking(1)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func badge(_ label: String, color: Color) -> some View {
