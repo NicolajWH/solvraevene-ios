@@ -15,7 +15,12 @@ platform :ios do
 
     match(
       type: "appstore",
-      app_identifier: ["dk.haugaard.solvraevene", "dk.haugaard.solvraevene.widget"],
+      app_identifier: [
+        "dk.haugaard.solvraevene",
+        "dk.haugaard.solvraevene.widget",
+        "dk.haugaard.solvraevene.watchkitapp",
+        "dk.haugaard.solvraevene.watchkitapp.watchwidget"
+      ],
       git_url: ENV["MATCH_GIT_URL"],
       git_basic_authorization: Base64.strict_encode64("x-access-token:#{ENV['MATCH_GIT_TOKEN']}"),
       readonly: false,
@@ -35,7 +40,9 @@ build_app(
   export_options: {
     provisioningProfiles: {
       "dk.haugaard.solvraevene" => "match AppStore dk.haugaard.solvraevene",
-      "dk.haugaard.solvraevene.widget" => "match AppStore dk.haugaard.solvraevene.widget"
+      "dk.haugaard.solvraevene.widget" => "match AppStore dk.haugaard.solvraevene.widget",
+      "dk.haugaard.solvraevene.watchkitapp" => "match AppStore dk.haugaard.solvraevene.watchkitapp",
+      "dk.haugaard.solvraevene.watchkitapp.watchwidget" => "match AppStore dk.haugaard.solvraevene.watchkitapp.watchwidget"
     }
   }
 )
