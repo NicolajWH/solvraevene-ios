@@ -58,6 +58,15 @@ struct TripDetailView: View {
                 }
             }
 
+            Section {
+                NavigationLink(destination: PackingListView(
+                    tripDate: trip.date,
+                    tripTitle: trip.location ?? "Tur"
+                )) {
+                    Label("Huskeliste", systemImage: "checklist")
+                }
+            }
+
             if trip.isFuture {
                 Section {
                     Button {

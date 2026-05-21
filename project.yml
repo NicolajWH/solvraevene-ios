@@ -50,6 +50,9 @@ targets:
       PROVISIONING_PROFILE_SPECIFIER: "match AppStore dk.haugaard.solvraevene"
       "PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]": "match AppStore dk.haugaard.solvraevene"
 
+    entitlements:
+      path: Solvraevene/Solvraevene.entitlements
+
   SolvraeveneWidget:
     type: app-extension
     platform: iOS
