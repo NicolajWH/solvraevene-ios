@@ -24,7 +24,8 @@ struct TripAnnouncement {
     init(record: CKRecord) {
         self.message = record["message"] as? String ?? ""
         self.meetingPlace = record["meetingPlace"] as? String ?? ""
-        self.departureDateTime = record["departureDateTime"] as? Date
+        // "departureDateTime" was accidentally created as STRING in CloudKit — use "departureAt" (DATE) instead
+        self.departureDateTime = record["departureAt"] as? Date
         self.returnDateTime = record["returnDateTime"] as? Date
         self.recordID = record.recordID
     }
@@ -53,8 +54,8 @@ actor TripAnnouncementService {
         }
         record["message"] = announcement.message
         record["meetingPlace"] = announcement.meetingPlace
-        record["departureDateTime"] = announcement.departureDateTime
-        record["returnDateTime"] = announcement.returnDateTime
+        record["departureAt"] = announcement.departureDateTime as CKRecordValue?
+        record["returnDateTime"] = announcement.returnDateTime as CKRecordValue?
         let saved = try await db.save(record)
         return TripAnnouncement(record: saved)
     }
