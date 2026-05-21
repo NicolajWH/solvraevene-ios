@@ -4,75 +4,72 @@ struct TripAnnouncementSection: View {
     let tripDate: String
     let tripEndDate: String?
     let tripTitle: String
-
-    @State private var announcement = TripAnnouncement.empty
-    @State private var isLoading = true
-    @State private var cloudError = false
+    let announcement: TripAnnouncement
+    let isLoading: Bool
+    let hasError: Bool
+    let onUpdate: (TripAnnouncement) -> Void
 
     var body: some View {
-        Group {
-            Section("Info") {
-                if isLoading {
-                    HStack {
-                        ProgressView().scaleEffect(0.8)
-                        Text("Henter info…").foregroundStyle(.secondary).font(.subheadline)
-                    }
-                } else if cloudError {
-                    Label("Ikke tilgængelig — tjek iCloud-login", systemImage: "icloud.slash")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
-                } else if announcement.isEmpty {
-                    NavigationLink(destination: editorView) {
-                        Label("Tilføj info fra formanden", systemImage: "plus.circle")
-                    }
-                } else {
-                    if !announcement.message.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("BESKED FRA FORMANDEN")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                            Text(announcement.message)
-                                .font(.body)
-                        }
-                        .padding(.vertical, 4)
-                    }
-
-                    if !announcement.meetingPlace.isEmpty {
-                        Button { openMaps(announcement.meetingPlace) } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: "mappin.circle.fill")
-                                    .foregroundStyle(.red)
-                                    .frame(width: 20)
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text("Mødested").font(.caption).foregroundStyle(.secondary)
-                                    Text(announcement.meetingPlace)
-                                        .font(.body.weight(.medium))
-                                        .foregroundStyle(.primary)
-                                }
-                                Spacer()
-                                Image(systemName: "arrow.up.right").font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.vertical, 2)
-                    }
-
-                    if let dt = announcement.departureDateTime {
-                        infoRow(icon: "arrow.right.circle.fill", color: .green, label: "Afgang", value: formatted(dt))
-                    }
-                    if let rt = announcement.returnDateTime {
-                        infoRow(icon: "arrow.left.circle.fill", color: .orange, label: "Hjemkomst", value: formatted(rt))
-                    }
-
-                    NavigationLink(destination: editorView) {
-                        Label("Rediger", systemImage: "pencil")
-                            .font(.subheadline)
+        Section("Info") {
+            if isLoading {
+                HStack {
+                    ProgressView().scaleEffect(0.8)
+                    Text("Henter info…").foregroundStyle(.secondary).font(.subheadline)
+                }
+            } else if hasError {
+                Label("Ikke tilgængelig — tjek iCloud-login", systemImage: "icloud.slash")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+            } else if announcement.isEmpty {
+                NavigationLink(destination: editorView) {
+                    Label("Tilføj info fra formanden", systemImage: "plus.circle")
+                }
+            } else {
+                if !announcement.message.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("BESKED FRA FORMANDEN")
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
+                        Text(announcement.message)
+                            .font(.body)
                     }
+                    .padding(.vertical, 4)
+                }
+
+                if !announcement.meetingPlace.isEmpty {
+                    Button { openMaps(announcement.meetingPlace) } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "mappin.circle.fill")
+                                .foregroundStyle(.red)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Mødested").font(.caption).foregroundStyle(.secondary)
+                                Text(announcement.meetingPlace)
+                                    .font(.body.weight(.medium))
+                                    .foregroundStyle(.primary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 2)
+                }
+
+                if let dt = announcement.departureDateTime {
+                    infoRow(icon: "arrow.right.circle.fill", color: .green, label: "Afgang", value: formatted(dt))
+                }
+                if let rt = announcement.returnDateTime {
+                    infoRow(icon: "arrow.left.circle.fill", color: .orange, label: "Hjemkomst", value: formatted(rt))
+                }
+
+                NavigationLink(destination: editorView) {
+                    Label("Rediger", systemImage: "pencil")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
-        .task { await load() }
     }
 
     private var editorView: some View {
@@ -80,24 +77,9 @@ struct TripAnnouncementSection: View {
             tripDate: tripDate,
             tripEndDate: tripEndDate,
             tripTitle: tripTitle,
-            announcement: announcement
-        ) { updated in
-            announcement = updated
-        }
-    }
-
-    private func load() async {
-        isLoading = true
-        cloudError = false
-        do {
-            announcement = try await TripAnnouncementService.shared.fetch(for: tripDate) ?? .empty
-        } catch {
-            cloudError = true
-        }
-        isLoading = false
-        if !cloudError {
-            await TripAnnouncementService.shared.subscribeIfNeeded(for: tripDate, tripTitle: tripTitle)
-        }
+            announcement: announcement,
+            onSave: onUpdate
+        )
     }
 
     private func formatted(_ date: Date) -> String {

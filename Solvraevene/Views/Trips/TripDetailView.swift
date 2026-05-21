@@ -6,6 +6,9 @@ struct TripDetailView: View {
 
     @State private var calendarMessage: String?
     @State private var showCalendarAlert = false
+    @State private var announcement = TripAnnouncement.empty
+    @State private var announcementLoading = true
+    @State private var announcementError = false
 
     private var displayTitle: String {
         trip.isFuture ? trip.formattedDateRange : (trip.location ?? trip.formattedDateRange)
@@ -66,7 +69,11 @@ struct TripDetailView: View {
                 TripAnnouncementSection(
                     tripDate: trip.date,
                     tripEndDate: trip.endDate,
-                    tripTitle: displayTitle
+                    tripTitle: displayTitle,
+                    announcement: announcement,
+                    isLoading: announcementLoading,
+                    hasError: announcementError,
+                    onUpdate: { updated in announcement = updated }
                 )
             }
 
@@ -91,11 +98,27 @@ struct TripDetailView: View {
         }
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.large)
+        .task {
+            await loadAnnouncement()
+        }
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}
         } message: {
             Text(calendarMessage ?? "")
         }
+    }
+
+    private func loadAnnouncement() async {
+        guard trip.isFuture else {
+            announcementLoading = false
+            return
+        }
+        do {
+            announcement = try await TripAnnouncementService.shared.fetch(for: trip.date) ?? .empty
+        } catch {
+            announcementError = true
+        }
+        announcementLoading = false
     }
 
     private func flag(for isoCode: String) -> String {

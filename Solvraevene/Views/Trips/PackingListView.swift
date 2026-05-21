@@ -93,12 +93,13 @@ struct PackingListView: View {
                 }
             }
         }
-        .task { await load() }
+        .onAppear {
+            Task { await load() }
+        }
     }
 
     private func load() async {
-        isLoading = true
-        error = nil
+        guard isLoading else { return }
         do {
             items = try await PackingListService.shared.fetchItems(for: tripDate)
             let stored = UserDefaults.standard.stringArray(forKey: checkedKey) ?? []
@@ -107,7 +108,6 @@ struct PackingListView: View {
             self.error = "Kunne ikke hente huskelisten. Tjek din internetforbindelse."
         }
         isLoading = false
-        await PackingListService.shared.subscribeIfNeeded(for: tripDate, tripTitle: tripTitle)
     }
 
     private func addItem() {
