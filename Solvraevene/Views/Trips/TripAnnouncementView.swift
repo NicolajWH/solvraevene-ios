@@ -158,7 +158,13 @@ struct AnnouncementEditorView: View {
         let startBase = f.date(from: tripDate) ?? Date()
         let endBase = tripEndDate.flatMap { f.date(from: $0) } ?? startBase
 
-        _departureDateTime = State(initialValue: announcement.departureDateTime ?? startBase)
+        let defaultDeparture: Date = {
+            var c = Calendar.current.dateComponents([.year, .month, .day], from: startBase)
+            c.hour = 9; c.minute = 0
+            return Calendar.current.date(from: c) ?? startBase
+        }()
+
+        _departureDateTime = State(initialValue: announcement.departureDateTime ?? defaultDeparture)
         _returnDateTime = State(initialValue: announcement.returnDateTime ?? endBase)
     }
 

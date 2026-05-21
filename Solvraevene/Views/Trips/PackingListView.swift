@@ -19,6 +19,8 @@ struct PackingListView: View {
         self.checkedKey = "packing_checked_\(tripDate)"
     }
 
+    private var checkedCount: Int { items.filter { checked.contains($0.id.recordName) }.count }
+
     var body: some View {
         List {
             if isLoading {
@@ -33,37 +35,33 @@ struct PackingListView: View {
                     .foregroundStyle(.secondary)
                     .font(.subheadline)
             } else {
-                if items.isEmpty {
-                    Text("Ingen punkter endnu. Tilføj det første herunder.")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
-                }
-
-                ForEach(items) { item in
-                    HStack(spacing: 12) {
-                        Button {
-                            toggle(item)
-                        } label: {
-                            Image(systemName: checked.contains(item.id.recordName) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(checked.contains(item.id.recordName) ? Color.accentColor : .secondary)
-                                .font(.title3)
-                        }
-                        .buttonStyle(.plain)
-
-                        Text(item.text)
-                            .strikethrough(checked.contains(item.id.recordName))
-                            .foregroundStyle(checked.contains(item.id.recordName) ? .secondary : .primary)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            delete(item)
-                        } label: {
-                            Label("Slet", systemImage: "trash")
-                        }
-                    }
-                }
-
                 Section {
+                    if items.isEmpty {
+                        Text("Ingen punkter endnu. Tilføj det første herunder.")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                    }
+
+                    ForEach(items) { item in
+                        HStack(spacing: 12) {
+                            Button { toggle(item) } label: {
+                                Image(systemName: checked.contains(item.id.recordName) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(checked.contains(item.id.recordName) ? Color.accentColor : Color(uiColor: .tertiaryLabel))
+                                    .font(.title3)
+                            }
+                            .buttonStyle(.plain)
+
+                            Text(item.text)
+                                .strikethrough(checked.contains(item.id.recordName))
+                                .foregroundStyle(checked.contains(item.id.recordName) ? .secondary : .primary)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) { delete(item) } label: {
+                                Label("Slet", systemImage: "trash")
+                            }
+                        }
+                    }
+
                     HStack {
                         TextField("Tilføj punkt…", text: $newItemText)
                             .focused($inputFocused)
@@ -77,11 +75,24 @@ struct PackingListView: View {
                             .buttonStyle(.plain)
                         }
                     }
+                } footer: {
+                    Text("Flueben er personlige — kun synlige på din enhed.")
                 }
             }
         }
-        .navigationTitle("Huskeliste")
+        .navigationTitle(items.isEmpty ? "Huskeliste" : "Huskeliste \(checkedCount)/\(items.count)")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if checkedCount > 0 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Nulstil") {
+                        checked.removeAll()
+                        saveChecked()
+                    }
+                    .foregroundStyle(.secondary)
+                }
+            }
+        }
         .task { await load() }
     }
 
@@ -121,9 +132,7 @@ struct PackingListView: View {
         items.removeAll { $0.id == item.id }
         checked.remove(item.id.recordName)
         saveChecked()
-        Task {
-            try? await PackingListService.shared.deleteItem(item)
-        }
+        Task { try? await PackingListService.shared.deleteItem(item) }
     }
 
     private func toggle(_ item: PackingItem) {
