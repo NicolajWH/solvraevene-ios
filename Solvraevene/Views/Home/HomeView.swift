@@ -25,6 +25,21 @@ struct HomeView: View {
         pastTrips.sorted { $0.date > $1.date }.first
     }
 
+    var onThisDayTrip: Trip? {
+        let cal = Calendar.current
+        let todayComponents = cal.dateComponents([.month, .day], from: Date())
+        return pastTrips
+            .filter { trip in
+                let f = DateFormatter()
+                f.dateFormat = "yyyy-MM-dd"
+                guard let d = f.date(from: trip.date) else { return false }
+                let c = cal.dateComponents([.month, .day], from: d)
+                return c.month == todayComponents.month && c.day == todayComponents.day
+            }
+            .sorted { $0.date < $1.date }
+            .first
+    }
+
     var countryCount: Int {
         StatsService.countryCounts(from: pastTrips).count
     }
@@ -78,7 +93,7 @@ struct HomeView: View {
                     Button { selectedTab = 1 } label: {
                         statTile(
                             value: pastTrips.count,
-                            label: "Ture gennemført",
+                            label: "Ture afholdt",
                             icon: "figure.walk.departure"
                         )
                     }
@@ -95,6 +110,18 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 24)
+
+                // MARK: On this day
+                if let trip = onThisDayTrip {
+                    VStack(alignment: .leading, spacing: 0) {
+                        sectionLabel("I dag for \(yearsAgo(trip)) år siden")
+                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                            upcomingCard(trip)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.top, 24)
+                }
 
                 // MARK: Last trip
                 if let trip = lastTrip {
@@ -217,6 +244,13 @@ struct HomeView: View {
     }
 
     // MARK: - Helpers
+
+    private func yearsAgo(_ trip: Trip) -> Int {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let d = f.date(from: trip.date) else { return 0 }
+        return Calendar.current.dateComponents([.year], from: d, to: Date()).year ?? 0
+    }
 
     private func flag(for isoCode: String) -> String {
         isoCode.unicodeScalars

@@ -29,6 +29,7 @@ private func countdownLabel(forStart date: String) -> String? {
 struct NextTripEntry: TimelineEntry {
     let date: Date
     let nextTrip: TripSnapshot?
+    let onThisDay: TripSnapshot?
 }
 
 struct TripProvider: TimelineProvider {
@@ -38,7 +39,7 @@ struct TripProvider: TimelineProvider {
             location: "Madrid",
             organizers: ["MR", "NWH"],
             countdown: "Om 156 dage"
-        ))
+        ), onThisDay: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (NextTripEntry) -> Void) {
@@ -69,22 +70,44 @@ struct TripProvider: TimelineProvider {
 
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
-        let today = f.string(from: Date())
+        let now = Date()
+        let today = f.string(from: now)
+        let cal = Calendar.current
+        let todayMD = cal.dateComponents([.month, .day], from: now)
 
-        guard let t = rawTrips
+        let nextTrip: TripSnapshot? = rawTrips
             .filter({ ($0.endDate ?? $0.date) >= today })
             .sorted(by: { $0.date < $1.date })
             .first
-        else {
-            return NextTripEntry(date: Date(), nextTrip: nil)
-        }
+            .map { t in
+                TripSnapshot(
+                    dateRange: formatRange(date: t.date, endDate: t.endDate),
+                    location: t.location,
+                    organizers: t.organizers,
+                    countdown: countdownLabel(forStart: t.date)
+                )
+            }
 
-        return NextTripEntry(date: Date(), nextTrip: TripSnapshot(
-            dateRange: formatRange(date: t.date, endDate: t.endDate),
-            location: t.location,
-            organizers: t.organizers,
-            countdown: countdownLabel(forStart: t.date)
-        ))
+        let onThisDay: TripSnapshot? = rawTrips
+            .filter { t in
+                guard (t.endDate ?? t.date) < today,
+                      let d = f.date(from: t.date) else { return false }
+                let c = cal.dateComponents([.month, .day], from: d)
+                return c.month == todayMD.month && c.day == todayMD.day
+            }
+            .sorted { $0.date < $1.date }
+            .first
+            .map { t in
+                let years = cal.dateComponents([.year], from: f.date(from: t.date)!, to: now).year ?? 0
+                return TripSnapshot(
+                    dateRange: "For \(years) år siden",
+                    location: t.location,
+                    organizers: t.organizers,
+                    countdown: nil
+                )
+            }
+
+        return NextTripEntry(date: now, nextTrip: nextTrip, onThisDay: onThisDay)
     }
 
     private func formatRange(date: String, endDate: String?) -> String {
@@ -162,9 +185,26 @@ struct WidgetEntryView: View {
 
                 Spacer(minLength: 0)
 
-                HStack(spacing: -6) {
-                    ForEach(trip.organizers, id: \.self) { initials in
-                        avatarView(initials: initials, size: isSmall ? 22 : 28)
+                if !isSmall, let otd = entry.onThisDay {
+                    Divider().overlay(Color.white.opacity(0.08)).padding(.vertical, 4)
+                    HStack(spacing: 8) {
+                        Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                            .font(.system(size: 10))
+                            .foregroundStyle(textSecondary)
+                        Text(otd.location ?? "I dag for \(otd.dateRange)")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(textSecondary)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(otd.dateRange)
+                            .font(.system(size: 10))
+                            .foregroundStyle(textSecondary.opacity(0.7))
+                    }
+                } else {
+                    HStack(spacing: -6) {
+                        ForEach(trip.organizers, id: \.self) { initials in
+                            avatarView(initials: initials, size: isSmall ? 22 : 28)
+                        }
                     }
                 }
             }

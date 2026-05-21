@@ -84,16 +84,12 @@ struct PersonerView: View {
                             }
 
                             Spacer()
-
-                            Text("\(item.count) \(item.count == 1 ? "tur" : "ture")")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
                     }
                 }
             } footer: {
-                Text("Tallet viser hvor mange ture broderen har arrangeret.")
+                Text("")
             }
 
             Section("Ture arrangeret") {

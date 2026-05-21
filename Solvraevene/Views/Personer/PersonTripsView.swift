@@ -32,5 +32,13 @@ struct PersonTripsView: View {
             }
         }
         .navigationTitle(name)
+        .safeAreaInset(edge: .bottom) {
+            Text("\(trips.count) \(trips.count == 1 ? "tur arrangeret" : "ture arrangeret")")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(.ultraThinMaterial)
+        }
     }
 }
