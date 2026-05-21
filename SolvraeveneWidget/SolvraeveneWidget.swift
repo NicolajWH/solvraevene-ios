@@ -147,8 +147,58 @@ struct WidgetEntryView: View {
     private let textSecondary = Color.white.opacity(0.6)
 
     private var isSmall: Bool { family == .systemSmall }
+    private var isAccessory: Bool { family == .accessoryRectangular }
 
     var body: some View {
+        if isAccessory {
+            accessoryView
+        } else {
+            systemView
+        }
+    }
+
+    // MARK: - CarPlay / Lock Screen (accessoryRectangular)
+
+    @ViewBuilder
+    private var accessoryView: some View {
+        if let trip = entry.nextTrip {
+            VStack(alignment: .leading, spacing: 2) {
+                Label("Næste tur", systemImage: "figure.walk.departure")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+
+                if let location = trip.location {
+                    Text(location)
+                        .font(.system(size: 14, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+
+                if let countdown = trip.countdown {
+                    Text(countdown)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .lineLimit(1)
+                } else {
+                    Text(trip.dateRange)
+                        .font(.system(size: 11))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .containerBackground(Color.clear, for: .widget)
+        } else {
+            Label("Ingen ture planlagt", systemImage: "figure.walk.departure")
+                .font(.caption)
+                .containerBackground(Color.clear, for: .widget)
+        }
+    }
+
+    // MARK: - System small / medium
+
+    @ViewBuilder
+    private var systemView: some View {
         if let trip = entry.nextTrip {
             VStack(alignment: .leading, spacing: 4) {
                 Text("NÆSTE TUR")
@@ -255,6 +305,6 @@ struct SolvraeveneWidget: Widget {
         }
         .configurationDisplayName("Sølvrævene")
         .description("Se næste planlagte tur.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
