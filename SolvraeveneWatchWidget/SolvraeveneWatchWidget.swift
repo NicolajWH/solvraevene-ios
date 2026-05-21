@@ -215,26 +215,19 @@ struct WatchWidgetEntryView: View {
         .containerBackground(Color.clear, for: .widget)
     }
 
-    // MARK: - Inline — enkelt linje øverst på urskiven
+    // MARK: - Inline — enkelt linje øverst på urskiven (ingen ikon, korteste tekst)
 
     @ViewBuilder
     private var inlineView: some View {
         if let trip = entry.nextTrip {
-            Label {
-                Group {
-                    if let location = trip.location, let countdown = trip.countdown {
-                        Text("\(location) · \(countdown)")
-                    } else if let location = trip.location {
-                        Text(location)
-                    } else {
-                        Text(trip.countdown ?? "Næste tur")
-                    }
-                }
-            } icon: {
-                Image(systemName: "figure.walk.departure")
+            switch trip.daysUntil {
+            case 0: Text("I dag")
+            case 1: Text("I morgen")
+            case let d? where d > 1: Text("\(d) dage")
+            default: Text("Næste tur")
             }
         } else {
-            Label("Ingen kommende tur", systemImage: "figure.walk.departure")
+            Text("Ingen tur")
         }
     }
 }
