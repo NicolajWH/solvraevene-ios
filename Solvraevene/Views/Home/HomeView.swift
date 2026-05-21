@@ -44,6 +44,20 @@ struct HomeView: View {
         StatsService.countryCounts(from: pastTrips).count
     }
 
+    var yearsSinceFounding: Int {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let first = pastTrips.sorted(by: { $0.date < $1.date }).first,
+              let d = f.date(from: first.date) else { return 0 }
+        return Calendar.current.dateComponents([.year], from: d, to: Date()).year ?? 0
+    }
+
+    var nextMilestone: Int {
+        let count = pastTrips.count
+        let step = count < 50 ? 5 : 10
+        return ((count / step) + 1) * step
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -110,6 +124,10 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 24)
+
+                // MARK: Milestones
+                milestoneCard
+                    .padding(.top, 24)
 
                 // MARK: On this day
                 if let trip = onThisDayTrip {
@@ -188,6 +206,55 @@ struct HomeView: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(cardStroke, lineWidth: 1)
         )
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Milestone card
+
+    private var milestoneCard: some View {
+        let count = pastTrips.count
+        let toNext = nextMilestone - count
+        let progress = Double(count - (nextMilestone - (nextMilestone < 50 ? 5 : 10))) / Double(nextMilestone < 50 ? 5 : 10)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("MILEPÆLE")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.2)
+                        .foregroundStyle(textSecondary)
+                    Text("\(toNext) ture fra #\(nextMilestone)")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(textPrimary)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("SIDEN FØRSTE TUR")
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.2)
+                        .foregroundStyle(textSecondary)
+                    Text("\(yearsSinceFounding) år")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(accent)
+                }
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 6)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(accent)
+                        .frame(width: geo.size.width * max(0, min(1, progress)), height: 6)
+                }
+            }
+            .frame(height: 6)
+        }
+        .padding(16)
+        .background(cardBg)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(cardStroke, lineWidth: 1))
         .padding(.horizontal, 16)
     }
 

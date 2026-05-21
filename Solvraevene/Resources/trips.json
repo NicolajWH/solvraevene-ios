@@ -18,7 +18,7 @@
   { "date": "2025-05-17", "endDate": "2025-05-19", "location": "London", "photoAlbumURL": null, "organizers": ["DM","NWH"] },
   { "date": "2024-10-25", "endDate": "2024-10-27", "location": "København", "photoAlbumURL": null, "organizers": ["MC","MSA"] },
   { "date": "2024-05-03", "endDate": "2024-05-05", "location": "Øster Hurup", "photoAlbumURL": null, "organizers": ["PHA","MR"] },
-  { "date": "2023-09-21", "endDate": "2023-09-23", "location": "Münich", "photoAlbumURL": null, "organizers": ["PHA","MR","DM","MSA","NWH","MC"] },
+  { "date": "2023-09-21", "endDate": "2023-09-23", "location": "München", "photoAlbumURL": null, "organizers": ["PHA","MR","DM","MSA","NWH","MC"] },
   { "date": "2022-10-28", "endDate": "2022-10-30", "location": "Krakow", "photoAlbumURL": null, "organizers": ["MR","MC"] },
   { "date": "2022-04-30", "endDate": "2022-05-02", "location": "Søndervig", "photoAlbumURL": null, "organizers": ["DM","MSA"] },
   { "date": "2021-10-29", "endDate": "2021-10-31", "location": "Prag", "photoAlbumURL": null, "organizers": ["PHA","NWH"] },
