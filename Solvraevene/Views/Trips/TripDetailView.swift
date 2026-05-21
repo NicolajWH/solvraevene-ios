@@ -7,6 +7,10 @@ struct TripDetailView: View {
     @State private var calendarMessage: String?
     @State private var showCalendarAlert = false
 
+    private var displayTitle: String {
+        trip.isFuture ? trip.formattedDateRange : (trip.location ?? trip.formattedDateRange)
+    }
+
     var body: some View {
         List {
             Section {
@@ -62,14 +66,14 @@ struct TripDetailView: View {
                 TripAnnouncementSection(
                     tripDate: trip.date,
                     tripEndDate: trip.endDate,
-                    tripTitle: trip.location ?? "Tur"
+                    tripTitle: displayTitle
                 )
             }
 
             Section {
                 NavigationLink(destination: PackingListView(
                     tripDate: trip.date,
-                    tripTitle: trip.location ?? "Tur"
+                    tripTitle: displayTitle
                 )) {
                     Label("Huskeliste", systemImage: "checklist")
                 }
@@ -85,7 +89,7 @@ struct TripDetailView: View {
                 }
             }
         }
-        .navigationTitle(trip.location ?? "Tur")
+        .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.large)
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}
@@ -120,7 +124,7 @@ struct TripDetailView: View {
                 guard let endDate = formatter.date(from: endString) else { return }
 
                 let event = EKEvent(eventStore: eventStore)
-                event.title = trip.location.map { "Sølvrævene – \($0)" } ?? "Sølvrævene"
+                event.title = trip.isFuture ? "Sølvrævene" : (trip.location.map { "Sølvrævene – \($0)" } ?? "Sølvrævene")
                 event.startDate = startDate
                 event.endDate = Calendar.current.date(byAdding: .day, value: 1, to: endDate) ?? endDate
                 event.isAllDay = true
