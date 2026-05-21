@@ -37,17 +37,31 @@ actor TripAnnouncementService {
     private let db = CKContainer.default().publicCloudDatabase
 
     func fetch(for tripDate: String) async throws -> TripAnnouncement? {
-        let pred = NSPredicate(format: "tripDate == %@", tripDate)
-        let query = CKQuery(recordType: "TripAnnouncement", predicate: pred)
-        let result = try await db.records(matching: query, resultsLimit: 1)
-        guard let record = try? result.matchResults.first?.1.get() else { return nil }
-        return TripAnnouncement(record: record)
+        try await withCheckedThrowingContinuation { continuation in
+            let pred = NSPredicate(format: "tripDate == %@", tripDate)
+            let query = CKQuery(recordType: "TripAnnouncement", predicate: pred)
+            let op = CKQueryOperation(query: query)
+            op.resultsLimit = 1
+            var found: CKRecord? = nil
+
+            op.recordFetchedBlock = { record in
+                if found == nil { found = record }
+            }
+            op.queryCompletionBlock = { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: found.map { TripAnnouncement(record: $0) })
+                }
+            }
+            db.add(op)
+        }
     }
 
     func save(_ announcement: TripAnnouncement, for tripDate: String) async throws -> TripAnnouncement {
         let record: CKRecord
         if let id = announcement.recordID {
-            record = try await db.record(for: id)
+            record = try await fetchRecord(id: id)
         } else {
             record = CKRecord(recordType: "TripAnnouncement")
             record["tripDate"] = tripDate
@@ -56,33 +70,33 @@ actor TripAnnouncementService {
         record["meetingPlace"] = announcement.meetingPlace
         record["departureAt"] = announcement.departureDateTime as CKRecordValue?
         record["returnDateTime"] = announcement.returnDateTime as CKRecordValue?
-        let saved = try await db.save(record)
-        return TripAnnouncement(record: saved)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let op = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
+            op.modifyRecordsCompletionBlock = { saved, _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: TripAnnouncement(record: saved?.first ?? record))
+                }
+            }
+            db.add(op)
+        }
     }
 
-    func subscribeIfNeeded(for tripDate: String, tripTitle: String) async {
-        let subKey = "ck_announcement_sub_\(tripDate)"
-        guard !UserDefaults.standard.bool(forKey: subKey) else { return }
-
-        let pred = NSPredicate(format: "tripDate == %@", tripDate)
-        let sub = CKQuerySubscription(
-            recordType: "TripAnnouncement",
-            predicate: pred,
-            subscriptionID: "announcement-\(tripDate)",
-            options: [.firesOnRecordCreation, .firesOnRecordUpdate]
-        )
-        let info = CKSubscription.NotificationInfo()
-        info.title = "Besked fra formanden"
-        info.alertBody = "Formanden har opdateret info om turen til \(tripTitle)"
-        info.soundName = "default"
-        info.shouldBadge = false
-        sub.notificationInfo = info
-
-        do {
-            _ = try await db.save(sub)
-            UserDefaults.standard.set(true, forKey: subKey)
-        } catch let error as CKError where error.code == .serverRejectedRequest {
-            UserDefaults.standard.set(true, forKey: subKey)
-        } catch {}
+    private func fetchRecord(id: CKRecord.ID) async throws -> CKRecord {
+        try await withCheckedThrowingContinuation { continuation in
+            let op = CKFetchRecordsOperation(recordIDs: [id])
+            op.fetchRecordsCompletionBlock = { records, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let record = records?[id] {
+                    continuation.resume(returning: record)
+                } else {
+                    continuation.resume(throwing: CKError(.unknownItem))
+                }
+            }
+            db.add(op)
+        }
     }
 }

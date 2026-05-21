@@ -17,16 +17,27 @@ actor PackingListService {
 
     private let db = CKContainer.default().publicCloudDatabase
 
-    // MARK: - Items
-
     func fetchItems(for tripDate: String) async throws -> [PackingItem] {
-        let pred = NSPredicate(format: "tripDate == %@", tripDate)
-        let query = CKQuery(recordType: "PackingItem", predicate: pred)
-        let result = try await db.records(matching: query)
-        return result.matchResults
-            .compactMap { try? $0.1.get() }
-            .map { PackingItem(record: $0) }
-            .sorted { $0.sortOrder < $1.sortOrder }
+        try await withCheckedThrowingContinuation { continuation in
+            let pred = NSPredicate(format: "tripDate == %@", tripDate)
+            let query = CKQuery(recordType: "PackingItem", predicate: pred)
+            let op = CKQueryOperation(query: query)
+            var records: [CKRecord] = []
+
+            op.recordFetchedBlock = { record in
+                records.append(record)
+            }
+            op.queryCompletionBlock = { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: records
+                        .map { PackingItem(record: $0) }
+                        .sorted { $0.sortOrder < $1.sortOrder })
+                }
+            }
+            db.add(op)
+        }
     }
 
     func addItem(tripDate: String, text: String, order: Int) async throws -> PackingItem {
@@ -34,40 +45,30 @@ actor PackingListService {
         record["tripDate"] = tripDate as CKRecordValue
         record["text"] = text as CKRecordValue
         record["sortOrder"] = NSNumber(value: order)
-        let saved = try await db.save(record)
-        return PackingItem(record: saved)
+        return try await withCheckedThrowingContinuation { continuation in
+            let op = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
+            op.modifyRecordsCompletionBlock = { saved, _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: PackingItem(record: saved?.first ?? record))
+                }
+            }
+            db.add(op)
+        }
     }
 
     func deleteItem(_ item: PackingItem) async throws {
-        try await db.deleteRecord(withID: item.id)
-    }
-
-    // MARK: - Subscriptions
-
-    func subscribeIfNeeded(for tripDate: String, tripTitle: String) async {
-        let subKey = "ck_subscribed_\(tripDate)"
-        guard !UserDefaults.standard.bool(forKey: subKey) else { return }
-
-        let pred = NSPredicate(format: "tripDate == %@", tripDate)
-        let sub = CKQuerySubscription(
-            recordType: "PackingItem",
-            predicate: pred,
-            subscriptionID: "packing-\(tripDate)",
-            options: [.firesOnRecordCreation, .firesOnRecordDeletion, .firesOnRecordUpdate]
-        )
-        let info = CKSubscription.NotificationInfo()
-        info.title = "Huskeliste opdateret"
-        info.alertBody = "Huskelisten til \(tripTitle) er blevet ændret"
-        info.soundName = "default"
-        info.shouldBadge = false
-        sub.notificationInfo = info
-
-        do {
-            _ = try await db.save(sub)
-            UserDefaults.standard.set(true, forKey: subKey)
-        } catch {
-            // Mark as done to avoid hammering the server on repeated opens
-            UserDefaults.standard.set(true, forKey: subKey)
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            let op = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [item.id])
+            op.modifyRecordsCompletionBlock = { _, _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+            db.add(op)
         }
     }
 }
