@@ -6,7 +6,7 @@ struct TripAnnouncementSection: View {
     let tripTitle: String
     let announcement: TripAnnouncement
     let isLoading: Bool
-    let hasError: Bool
+    let errorMessage: String?
     let onUpdate: (TripAnnouncement) -> Void
 
     var body: some View {
@@ -16,10 +16,15 @@ struct TripAnnouncementSection: View {
                     ProgressView().scaleEffect(0.8)
                     Text("Henter info…").foregroundStyle(.secondary).font(.subheadline)
                 }
-            } else if hasError {
-                Label("Ikke tilgængelig — tjek iCloud-login", systemImage: "icloud.slash")
-                    .foregroundStyle(.secondary)
-                    .font(.subheadline)
+            } else if let errorMessage {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("iCloud ikke tilgængelig", systemImage: "icloud.slash")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             } else if announcement.isEmpty {
                 NavigationLink(destination: editorView) {
                     Label("Tilføj info fra formanden", systemImage: "plus.circle")

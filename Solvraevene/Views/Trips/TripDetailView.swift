@@ -8,7 +8,7 @@ struct TripDetailView: View {
     @State private var showCalendarAlert = false
     @State private var announcement = TripAnnouncement.empty
     @State private var announcementLoading = true
-    @State private var announcementError = false
+    @State private var announcementError: String?
 
     private var displayTitle: String {
         trip.isFuture ? trip.formattedDateRange : (trip.location ?? trip.formattedDateRange)
@@ -72,7 +72,7 @@ struct TripDetailView: View {
                     tripTitle: displayTitle,
                     announcement: announcement,
                     isLoading: announcementLoading,
-                    hasError: announcementError,
+                    errorMessage: announcementError,
                     onUpdate: { updated in announcement = updated }
                 )
             }
@@ -110,10 +110,15 @@ struct TripDetailView: View {
             announcementLoading = false
             return
         }
+        if let reason = await TripAnnouncementService.shared.cloudKitUnavailableReason() {
+            announcementError = reason
+            announcementLoading = false
+            return
+        }
         do {
             announcement = try await TripAnnouncementService.shared.fetch(for: trip.date) ?? .empty
         } catch {
-            announcementError = true
+            announcementError = "CloudKit-fejl: \(error.localizedDescription)"
         }
         announcementLoading = false
     }

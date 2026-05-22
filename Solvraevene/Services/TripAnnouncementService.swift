@@ -36,6 +36,23 @@ actor TripAnnouncementService {
 
     private let db = CKContainer.default().publicCloudDatabase
 
+    // Returns nil if iCloud is available, or a human-readable reason if not.
+    func cloudKitUnavailableReason() async -> String? {
+        do {
+            let status = try await CKContainer.default().accountStatus()
+            switch status {
+            case .available: return nil
+            case .noAccount: return "Du er ikke logget ind på iCloud. Gå til Indstillinger → [dit navn] → iCloud."
+            case .restricted: return "iCloud er begrænset på denne enhed (forældrekontrol eller MDM)."
+            case .couldNotDetermine: return "Kunne ikke kontrollere iCloud-status. Tjek din internetforbindelse."
+            case .temporarilyUnavailable: return "iCloud er midlertidigt utilgængeligt. Prøv igen om lidt."
+            @unknown default: return "Ukendt iCloud-status."
+            }
+        } catch {
+            return "iCloud-fejl: \(error.localizedDescription)"
+        }
+    }
+
     func fetch(for tripDate: String) async throws -> TripAnnouncement? {
         try await withCheckedThrowingContinuation { continuation in
             let pred = NSPredicate(format: "tripDate == %@", tripDate)

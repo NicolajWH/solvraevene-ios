@@ -18,9 +18,6 @@ struct SolvraeveneApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        // Pre-warm CloudKit singletons on the main thread so dispatch_once never fires
-        // from a background actor context, which causes a fatal CloudKit assertion.
-        _ = PackingListService.shared
         _ = TripAnnouncementService.shared
         Task {
             let granted = try? await UNUserNotificationCenter.current()
