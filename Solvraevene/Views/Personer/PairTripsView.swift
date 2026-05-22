@@ -37,7 +37,7 @@ struct PairTripsView: View {
 
             Section("Fælles ture") {
                 ForEach(trips.sorted { $0.date > $1.date }) { trip in
-                    NavigationLink(destination: TripDetailView(trip: trip)) {
+                    NavigationLink(value: trip) {
                         VStack(alignment: .leading, spacing: 3) {
                             if let location = trip.location {
                                 Text(location).font(.headline)

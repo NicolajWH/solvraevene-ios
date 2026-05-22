@@ -18,7 +18,7 @@ struct CountryTripsView: View {
     var body: some View {
         List {
             ForEach(trips.sorted { $0.date > $1.date }) { trip in
-                NavigationLink(destination: TripDetailView(trip: trip)) {
+                NavigationLink(value: trip) {
                     HStack(alignment: .center, spacing: 12) {
                         HStack(spacing: -10) {
                             ForEach(trip.organizers, id: \.self) { initials in

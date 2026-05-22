@@ -1,7 +1,9 @@
 import Foundation
 import CoreLocation
 
-struct Trip: Identifiable, Codable {
+struct Trip: Identifiable, Codable, Hashable {
+    static func == (lhs: Trip, rhs: Trip) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
     var id = UUID()
     let date: String
     let endDate: String?

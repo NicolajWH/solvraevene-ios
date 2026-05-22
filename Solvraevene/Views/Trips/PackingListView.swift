@@ -1,5 +1,10 @@
 import SwiftUI
 
+struct PackingListRoute: Hashable {
+    let tripDate: String
+    let tripTitle: String
+}
+
 struct PackingListView: View {
     let tripDate: String
     let tripTitle: String

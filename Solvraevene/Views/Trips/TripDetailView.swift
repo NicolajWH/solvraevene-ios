@@ -78,10 +78,7 @@ struct TripDetailView: View {
             }
 
             Section {
-                NavigationLink(destination: PackingListView(
-                    tripDate: trip.date,
-                    tripTitle: displayTitle
-                )) {
+                NavigationLink(value: PackingListRoute(tripDate: trip.date, tripTitle: displayTitle)) {
                     Label("Huskeliste", systemImage: "checklist")
                 }
             }

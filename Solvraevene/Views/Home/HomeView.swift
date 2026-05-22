@@ -93,7 +93,7 @@ struct HomeView: View {
                     } else {
                         VStack(spacing: 10) {
                             ForEach(nextTrips) { trip in
-                                NavigationLink(destination: TripDetailView(trip: trip)) {
+                                NavigationLink(value: trip) {
                                     upcomingCard(trip)
                                 }
                                 .buttonStyle(.plain)
@@ -133,7 +133,7 @@ struct HomeView: View {
                 if let trip = onThisDayTrip {
                     VStack(alignment: .leading, spacing: 0) {
                         sectionLabel("I dag for \(yearsAgo(trip)) år siden")
-                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                        NavigationLink(value: trip) {
                             upcomingCard(trip)
                         }
                         .buttonStyle(.plain)
@@ -145,7 +145,7 @@ struct HomeView: View {
                 if let trip = lastTrip {
                     VStack(alignment: .leading, spacing: 0) {
                         sectionLabel("Seneste tur")
-                        NavigationLink(destination: TripDetailView(trip: trip)) {
+                        NavigationLink(value: trip) {
                             lastTripCard(trip)
                         }
                         .buttonStyle(.plain)

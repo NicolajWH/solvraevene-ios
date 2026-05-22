@@ -54,7 +54,7 @@ struct TripListView: View {
                 ForEach(futureByYear, id: \.year) { group in
                     Section(group.year) {
                         ForEach(group.trips) { trip in
-                            NavigationLink(destination: TripDetailView(trip: trip)) {
+                            NavigationLink(value: trip) {
                                 tripRow(trip)
                             }
                         }
@@ -64,7 +64,7 @@ struct TripListView: View {
                 ForEach(pastByYear, id: \.year) { group in
                     Section(group.year) {
                         ForEach(group.trips) { trip in
-                            NavigationLink(destination: TripDetailView(trip: trip)) {
+                            NavigationLink(value: trip) {
                                 tripRow(trip)
                             }
                         }
