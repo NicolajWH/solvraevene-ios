@@ -1,6 +1,28 @@
 import Foundation
 import CoreLocation
 
+struct TripAnnouncement: Codable {
+    var message: String?
+    var meetingPlace: String?
+    var departureAt: String?    // "yyyy-MM-dd'T'HH:mm"
+    var returnDateTime: String? // "yyyy-MM-dd'T'HH:mm"
+
+    var isEmpty: Bool {
+        (message ?? "").isEmpty && (meetingPlace ?? "").isEmpty
+            && departureAt == nil && returnDateTime == nil
+    }
+
+    func departureDate() -> Date? { parseDate(departureAt) }
+    func returnDate() -> Date?    { parseDate(returnDateTime) }
+
+    private func parseDate(_ s: String?) -> Date? {
+        guard let s else { return nil }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        return f.date(from: s)
+    }
+}
+
 struct Trip: Identifiable, Codable, Hashable {
     static func == (lhs: Trip, rhs: Trip) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
@@ -10,6 +32,7 @@ struct Trip: Identifiable, Codable, Hashable {
     let location: String?
     let organizers: [String]
     let photoAlbumURL: String?
+    let announcement: TripAnnouncement?
 
     // Populated after geocoding — not stored in JSON
     var country: String?
@@ -84,6 +107,6 @@ struct Trip: Identifiable, Codable, Hashable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case date, endDate, location, organizers, photoAlbumURL
+        case date, endDate, location, organizers, photoAlbumURL, announcement
     }
 }

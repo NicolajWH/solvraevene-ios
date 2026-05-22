@@ -1,57 +1,29 @@
 import SwiftUI
 
 struct TripAnnouncementSection: View {
-    let tripDate: String
-    let tripEndDate: String?
-    let tripTitle: String
-    let announcement: TripAnnouncement
-    let isLoading: Bool
-    let errorMessage: String?
-    let onUpdate: (TripAnnouncement) -> Void
+    let announcement: TripAnnouncement?
 
     var body: some View {
         Section("Info") {
-            if isLoading {
-                HStack {
-                    ProgressView().scaleEffect(0.8)
-                    Text("Henter info…").foregroundStyle(.secondary).font(.subheadline)
-                }
-            } else if let errorMessage {
-                VStack(alignment: .leading, spacing: 4) {
-                    Label("iCloud ikke tilgængelig", systemImage: "icloud.slash")
-                        .foregroundStyle(.secondary)
-                        .font(.subheadline)
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-            } else if announcement.isEmpty {
-                NavigationLink(destination: editorView) {
-                    Label("Tilføj info fra formanden", systemImage: "plus.circle")
-                }
-            } else {
-                if !announcement.message.isEmpty {
+            if let a = announcement, !a.isEmpty {
+                if let msg = a.message, !msg.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("BESKED FRA FORMANDEN")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
-                        Text(announcement.message)
-                            .font(.body)
+                        Text(msg).font(.body)
                     }
                     .padding(.vertical, 4)
                 }
 
-                if !announcement.meetingPlace.isEmpty {
-                    Button { openMaps(announcement.meetingPlace) } label: {
+                if let place = a.meetingPlace, !place.isEmpty {
+                    Button { openMaps(place) } label: {
                         HStack(spacing: 10) {
                             Image(systemName: "mappin.circle.fill")
-                                .foregroundStyle(.red)
-                                .frame(width: 20)
+                                .foregroundStyle(.red).frame(width: 20)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text("Mødested").font(.caption).foregroundStyle(.secondary)
-                                Text(announcement.meetingPlace)
-                                    .font(.body.weight(.medium))
-                                    .foregroundStyle(.primary)
+                                Text(place).font(.body.weight(.medium)).foregroundStyle(.primary)
                             }
                             Spacer()
                             Image(systemName: "arrow.up.right").font(.caption).foregroundStyle(.secondary)
@@ -61,30 +33,20 @@ struct TripAnnouncementSection: View {
                     .padding(.vertical, 2)
                 }
 
-                if let dt = announcement.departureDateTime {
-                    infoRow(icon: "arrow.right.circle.fill", color: .green, label: "Afgang", value: formatted(dt))
+                if let dt = a.departureDate() {
+                    infoRow(icon: "arrow.right.circle.fill", color: .green,
+                            label: "Afgang", value: formatted(dt))
                 }
-                if let rt = announcement.returnDateTime {
-                    infoRow(icon: "arrow.left.circle.fill", color: .orange, label: "Hjemkomst", value: formatted(rt))
+                if let rt = a.returnDate() {
+                    infoRow(icon: "arrow.left.circle.fill", color: .orange,
+                            label: "Hjemkomst", value: formatted(rt))
                 }
-
-                NavigationLink(destination: editorView) {
-                    Label("Rediger", systemImage: "pencil")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+            } else {
+                Text("Ingen info endnu — opdateres i trips.json")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
             }
         }
-    }
-
-    private var editorView: some View {
-        AnnouncementEditorView(
-            tripDate: tripDate,
-            tripEndDate: tripEndDate,
-            tripTitle: tripTitle,
-            announcement: announcement,
-            onSave: onUpdate
-        )
     }
 
     private func formatted(_ date: Date) -> String {
@@ -110,109 +72,5 @@ struct TripAnnouncementSection: View {
             }
         }
         .padding(.vertical, 2)
-    }
-}
-
-struct AnnouncementEditorView: View {
-    let tripDate: String
-    let tripEndDate: String?
-    let tripTitle: String
-    let initial: TripAnnouncement
-    let onSave: (TripAnnouncement) -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var message: String
-    @State private var meetingPlace: String
-    @State private var departureDateTime: Date
-    @State private var returnDateTime: Date
-    @State private var isSaving = false
-    @State private var error: String?
-
-    init(tripDate: String, tripEndDate: String?, tripTitle: String, announcement: TripAnnouncement, onSave: @escaping (TripAnnouncement) -> Void) {
-        self.tripDate = tripDate
-        self.tripEndDate = tripEndDate
-        self.tripTitle = tripTitle
-        self.initial = announcement
-        self.onSave = onSave
-        _message = State(initialValue: announcement.message)
-        _meetingPlace = State(initialValue: announcement.meetingPlace)
-
-        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
-        let startBase = f.date(from: tripDate) ?? Date()
-        let endBase = tripEndDate.flatMap { f.date(from: $0) } ?? startBase
-
-        let defaultDeparture: Date = {
-            var c = Calendar.current.dateComponents([.year, .month, .day], from: startBase)
-            c.hour = 9; c.minute = 0
-            return Calendar.current.date(from: c) ?? startBase
-        }()
-
-        _departureDateTime = State(initialValue: announcement.departureDateTime ?? defaultDeparture)
-        _returnDateTime = State(initialValue: announcement.returnDateTime ?? endBase)
-    }
-
-    private var tripStartDate: Date {
-        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
-        return f.date(from: tripDate) ?? Date()
-    }
-
-    var body: some View {
-        Form {
-            Section("Besked fra formanden") {
-                TextField("F.eks. husk at pakke støvler!", text: $message, axis: .vertical)
-                    .lineLimit(4, reservesSpace: true)
-            }
-            Section("Mødested") {
-                HStack {
-                    Image(systemName: "mappin.circle.fill").foregroundStyle(.red)
-                    TextField("F.eks. Nicolajs hjem", text: $meetingPlace)
-                }
-            }
-            Section("Afgang") {
-                LabeledContent("Dato") {
-                    Text(tripStartDate, style: .date).foregroundStyle(.secondary)
-                }
-                DatePicker("Tidspunkt", selection: $departureDateTime, displayedComponents: .hourAndMinute)
-            }
-            Section {
-                DatePicker("Dato", selection: $returnDateTime, in: tripStartDate..., displayedComponents: .date)
-                DatePicker("Tidspunkt", selection: $returnDateTime, displayedComponents: .hourAndMinute)
-            } header: {
-                Text("Hjemkomst")
-            } footer: {
-                Text("Ændr datoen hvis turen slutter tidligere end planlagt.")
-            }
-            if let error {
-                Section {
-                    Text(error).foregroundStyle(.red).font(.caption)
-                }
-            }
-        }
-        .navigationTitle(tripTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) { Button("Gem") { save() }.disabled(isSaving) }
-        }
-        .overlay { if isSaving { ProgressView() } }
-    }
-
-    private func save() {
-        isSaving = true
-        error = nil
-        let updated = TripAnnouncement(
-            message: message, meetingPlace: meetingPlace,
-            departureDateTime: departureDateTime, returnDateTime: returnDateTime,
-            recordID: initial.recordID
-        )
-        Task {
-            do {
-                let saved = try await TripAnnouncementService.shared.save(updated, for: tripDate)
-                onSave(saved)
-                dismiss()
-            } catch {
-                self.error = "Kunne ikke gemme. Tjek din iCloud-forbindelse og prøv igen."
-            }
-            isSaving = false
-        }
     }
 }

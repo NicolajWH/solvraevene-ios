@@ -6,9 +6,6 @@ struct TripDetailView: View {
 
     @State private var calendarMessage: String?
     @State private var showCalendarAlert = false
-    @State private var announcement = TripAnnouncement.empty
-    @State private var announcementLoading = true
-    @State private var announcementError: String?
 
     private var displayTitle: String {
         trip.isFuture ? trip.formattedDateRange : (trip.location ?? trip.formattedDateRange)
@@ -34,8 +31,7 @@ struct TripDetailView: View {
                         .padding(.top, 2)
                         .padding(.bottom, 16)
 
-                    Divider()
-                        .padding(.bottom, 16)
+                    Divider().padding(.bottom, 16)
 
                     Text("Arrangører")
                         .font(.caption.weight(.semibold))
@@ -66,15 +62,7 @@ struct TripDetailView: View {
             }
 
             if trip.isFuture {
-                TripAnnouncementSection(
-                    tripDate: trip.date,
-                    tripEndDate: trip.endDate,
-                    tripTitle: displayTitle,
-                    announcement: announcement,
-                    isLoading: announcementLoading,
-                    errorMessage: announcementError,
-                    onUpdate: { updated in announcement = updated }
-                )
+                TripAnnouncementSection(announcement: trip.announcement)
             }
 
             Section {
@@ -85,9 +73,7 @@ struct TripDetailView: View {
 
             if trip.isFuture {
                 Section {
-                    Button {
-                        addToCalendar()
-                    } label: {
+                    Button { addToCalendar() } label: {
                         Label("Tilføj til kalender", systemImage: "calendar.badge.plus")
                     }
                 }
@@ -95,32 +81,11 @@ struct TripDetailView: View {
         }
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.large)
-        .task {
-            await loadAnnouncement()
-        }
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}
         } message: {
             Text(calendarMessage ?? "")
         }
-    }
-
-    private func loadAnnouncement() async {
-        guard trip.isFuture else {
-            announcementLoading = false
-            return
-        }
-        if let reason = await TripAnnouncementService.shared.cloudKitUnavailableReason() {
-            announcementError = reason
-            announcementLoading = false
-            return
-        }
-        do {
-            announcement = try await TripAnnouncementService.shared.fetch(for: trip.date) ?? .empty
-        } catch {
-            announcementError = "CloudKit-fejl: \(error.localizedDescription)"
-        }
-        announcementLoading = false
     }
 
     private func flag(for isoCode: String) -> String {
@@ -143,7 +108,6 @@ struct TripDetailView: View {
 
                 let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy-MM-dd"
-
                 guard let startDate = formatter.date(from: trip.date) else { return }
                 let endString = trip.endDate ?? trip.date
                 guard let endDate = formatter.date(from: endString) else { return }
@@ -155,7 +119,6 @@ struct TripDetailView: View {
                 event.isAllDay = true
                 event.notes = "Arrangører: \(trip.organizers.map { Organizer.fullName(for: $0) }.joined(separator: " & "))"
                 event.calendar = eventStore.defaultCalendarForNewEvents
-
                 try eventStore.save(event, span: .thisEvent)
                 calendarMessage = "Turen er tilføjet til din kalender."
                 showCalendarAlert = true
