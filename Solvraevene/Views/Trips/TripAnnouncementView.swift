@@ -139,20 +139,6 @@ struct AnnouncementEditorView: View {
 
     var body: some View {
         Form {
-            Section("Besked fra formanden") {
-                TextEditor(text: $message)
-                    .frame(minHeight: 200)
-                    .overlay(alignment: .topLeading) {
-                        if message.isEmpty {
-                            Text("Skriv en besked til deltagerne…")
-                                .foregroundStyle(.tertiary)
-                                .padding(.top, 8)
-                                .padding(.leading, 5)
-                                .allowsHitTesting(false)
-                        }
-                    }
-            }
-
             Section("Mødested") {
                 HStack {
                     Image(systemName: "mappin.circle.fill").foregroundStyle(.red)
@@ -170,7 +156,6 @@ struct AnnouncementEditorView: View {
             }
 
             Section {
-                // Let user pick Saturday or Sunday (or any day in range)
                 DatePicker("Dato", selection: $returnDateTime,
                            in: tripStartDate...Calendar.current.date(byAdding: .day, value: 3, to: tripEndDate)!,
                            displayedComponents: .date)
@@ -179,6 +164,20 @@ struct AnnouncementEditorView: View {
                 Text("Hjemkomst")
             } footer: {
                 Text("Vælg lørdag eller søndag afhængigt af hvornår I kører hjem.")
+            }
+
+            Section("Besked fra formanden") {
+                TextEditor(text: $message)
+                    .frame(minHeight: 200)
+                    .overlay(alignment: .topLeading) {
+                        if message.isEmpty {
+                            Text("Skriv en besked til deltagerne…")
+                                .foregroundStyle(.tertiary)
+                                .padding(.top, 8)
+                                .padding(.leading, 5)
+                                .allowsHitTesting(false)
+                        }
+                    }
             }
         }
         .navigationTitle("Info om turen")
