@@ -140,8 +140,17 @@ struct AnnouncementEditorView: View {
     var body: some View {
         Form {
             Section("Besked fra formanden") {
-                TextField("F.eks. husk at pakke støvler!", text: $message, axis: .vertical)
-                    .lineLimit(4, reservesSpace: true)
+                TextEditor(text: $message)
+                    .frame(minHeight: 200)
+                    .overlay(alignment: .topLeading) {
+                        if message.isEmpty {
+                            Text("Skriv en besked til deltagerne…")
+                                .foregroundStyle(.tertiary)
+                                .padding(.top, 8)
+                                .padding(.leading, 5)
+                                .allowsHitTesting(false)
+                        }
+                    }
             }
 
             Section("Mødested") {
