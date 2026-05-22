@@ -4,8 +4,13 @@ import EventKit
 struct TripDetailView: View {
     let trip: Trip
 
+    @State private var localAnnouncement: TripAnnouncement?
     @State private var calendarMessage: String?
     @State private var showCalendarAlert = false
+
+    private var effectiveAnnouncement: TripAnnouncement? {
+        localAnnouncement ?? trip.announcement
+    }
 
     private var displayTitle: String {
         trip.isFuture ? trip.formattedDateRange : (trip.location ?? trip.formattedDateRange)
@@ -62,7 +67,14 @@ struct TripDetailView: View {
             }
 
             if trip.isFuture {
-                TripAnnouncementSection(announcement: trip.announcement)
+                TripAnnouncementSection(
+                    trip: trip,
+                    announcement: effectiveAnnouncement,
+                    onSave: { saved in
+                        LocalAnnouncementService.save(saved, for: trip.date)
+                        localAnnouncement = saved
+                    }
+                )
             }
 
             Section {
@@ -81,6 +93,7 @@ struct TripDetailView: View {
         }
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.large)
+        .onAppear { localAnnouncement = LocalAnnouncementService.load(for: trip.date) }
         .alert("Kalender", isPresented: $showCalendarAlert) {
             Button("OK") {}
         } message: {

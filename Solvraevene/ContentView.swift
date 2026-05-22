@@ -47,5 +47,8 @@ private extension View {
             .navigationDestination(for: PackingListRoute.self) {
                 PackingListView(tripDate: $0.tripDate, tripTitle: $0.tripTitle)
             }
+            .navigationDestination(for: AnnouncementEditorRoute.self) {
+                AnnouncementEditorView(route: $0)
+            }
     }
 }
