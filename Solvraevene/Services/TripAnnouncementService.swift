@@ -44,14 +44,15 @@ actor TripAnnouncementService {
             op.resultsLimit = 1
             var found: CKRecord? = nil
 
-            op.recordFetchedBlock = { record in
-                if found == nil { found = record }
+            op.recordMatchedBlock = { _, result in
+                if case .success(let record) = result, found == nil { found = record }
             }
-            op.queryCompletionBlock = { _, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
+            op.queryResultBlock = { result in
+                switch result {
+                case .success:
                     continuation.resume(returning: found.map { TripAnnouncement(record: $0) })
+                case .failure(let error):
+                    continuation.resume(throwing: error)
                 }
             }
             db.add(op)
@@ -73,11 +74,16 @@ actor TripAnnouncementService {
 
         return try await withCheckedThrowingContinuation { continuation in
             let op = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
-            op.modifyRecordsCompletionBlock = { saved, _, error in
-                if let error {
+            var savedRecord: CKRecord? = nil
+            op.perRecordSaveBlock = { _, result in
+                if case .success(let r) = result { savedRecord = r }
+            }
+            op.modifyRecordsResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: TripAnnouncement(record: savedRecord ?? record))
+                case .failure(let error):
                     continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: TripAnnouncement(record: saved?.first ?? record))
                 }
             }
             db.add(op)
@@ -87,13 +93,20 @@ actor TripAnnouncementService {
     private func fetchRecord(id: CKRecord.ID) async throws -> CKRecord {
         try await withCheckedThrowingContinuation { continuation in
             let op = CKFetchRecordsOperation(recordIDs: [id])
-            op.fetchRecordsCompletionBlock = { records, error in
-                if let error {
+            var fetchedRecord: CKRecord? = nil
+            op.perRecordResultBlock = { _, result in
+                if case .success(let record) = result { fetchedRecord = record }
+            }
+            op.fetchRecordsResultBlock = { result in
+                switch result {
+                case .success:
+                    if let record = fetchedRecord {
+                        continuation.resume(returning: record)
+                    } else {
+                        continuation.resume(throwing: CKError(.unknownItem))
+                    }
+                case .failure(let error):
                     continuation.resume(throwing: error)
-                } else if let record = records?[id] {
-                    continuation.resume(returning: record)
-                } else {
-                    continuation.resume(throwing: CKError(.unknownItem))
                 }
             }
             db.add(op)

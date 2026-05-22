@@ -24,16 +24,19 @@ actor PackingListService {
             let op = CKQueryOperation(query: query)
             var records: [CKRecord] = []
 
-            op.recordFetchedBlock = { record in
-                records.append(record)
+            op.recordMatchedBlock = { _, result in
+                if case .success(let record) = result {
+                    records.append(record)
+                }
             }
-            op.queryCompletionBlock = { _, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
+            op.queryResultBlock = { result in
+                switch result {
+                case .success:
                     continuation.resume(returning: records
                         .map { PackingItem(record: $0) }
                         .sorted { $0.sortOrder < $1.sortOrder })
+                case .failure(let error):
+                    continuation.resume(throwing: error)
                 }
             }
             db.add(op)
@@ -47,11 +50,16 @@ actor PackingListService {
         record["sortOrder"] = NSNumber(value: order)
         return try await withCheckedThrowingContinuation { continuation in
             let op = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
-            op.modifyRecordsCompletionBlock = { saved, _, error in
-                if let error {
+            var savedRecord: CKRecord? = nil
+            op.perRecordSaveBlock = { _, result in
+                if case .success(let r) = result { savedRecord = r }
+            }
+            op.modifyRecordsResultBlock = { result in
+                switch result {
+                case .success:
+                    continuation.resume(returning: PackingItem(record: savedRecord ?? record))
+                case .failure(let error):
                     continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: PackingItem(record: saved?.first ?? record))
                 }
             }
             db.add(op)
@@ -61,11 +69,10 @@ actor PackingListService {
     func deleteItem(_ item: PackingItem) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let op = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: [item.id])
-            op.modifyRecordsCompletionBlock = { _, _, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume()
+            op.modifyRecordsResultBlock = { result in
+                switch result {
+                case .success: continuation.resume()
+                case .failure(let error): continuation.resume(throwing: error)
                 }
             }
             db.add(op)
