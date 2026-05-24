@@ -12,7 +12,7 @@
   { "date": "2028-10-27", "endDate": "2028-10-29", "location": null, "photoAlbumURL": null, "organizers": ["DM","MR"] },
   { "date": "2028-04-21", "endDate": "2028-04-23", "location": null, "photoAlbumURL": null, "organizers": ["NWH","PHA"] },
   { "date": "2027-10-29", "endDate": "2027-10-31", "location": null, "photoAlbumURL": null, "organizers": ["DM","MC"] },
-  { "date": "2027-04-23", "endDate": "2027-04-25", "location": null, "photoAlbumURL": null, "organizers": ["MSA","PHA"] },
+  { "date": "2027-04-23", "endDate": "2027-04-25", "location": null, "photoAlbumURL": null, "organizers": ["MC","DM"] },
   { "date": "2026-10-23", "endDate": "2026-10-25", "location": null, "photoAlbumURL": null, "organizers": ["MR","NWH"] },
   { "date": "2026-05-01", "endDate": "2026-05-02", "location": "Vejle", "photoAlbumURL": null, "organizers": ["PHA","MSA"] },
   { "date": "2025-05-17", "endDate": "2025-05-19", "location": "London", "photoAlbumURL": null, "organizers": ["DM","NWH"] },
